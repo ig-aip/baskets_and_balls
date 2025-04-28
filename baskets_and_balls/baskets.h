@@ -1,4 +1,3 @@
-#include "iostream"
 #ifndef BASKETS_H
 #define BASKETS_H
 #include "QRandomGenerator"
@@ -8,8 +7,6 @@ private:
     int countBlueBalls;
     int countRedBalls;
     int allCount;
-    int procentBlueBall;
-    int procentRedBall;
     short changesFlag = 0;
     //00000000 00000000 none
     //10000000 00000000 blue ball
@@ -17,10 +14,11 @@ private:
     //00100000 00000000 mode sub 2 blue balls
     //00010000 00000000 mode sub 2 red balls
     //00001000 00000000 mode sub 1 blue and 1 red balls
-    //00000100 00000000 message sub 2 blue ball in first basket
-    //00000010 00000000 message sub 1 blue ball in first and 1 blue ball in second basket
-    //00000001 00000000 message sub 2 red ball  int first basket
-    //00000000 10000000 message sub 1 red in first 1 red in second
+    //00000100 00000000 message sub 2 blue balls
+    //00000010 00000000 message sub 1 blue ball
+    //00000001 00000000 message sub 2 red balls
+    //00000000 10000000 message sub 1 red ball
+    //00000000 01000000 message sub 1 blue 1 red balls
 
 public:
     Baskets()
@@ -53,7 +51,7 @@ public:
         return getCountRedBalls() + second.getCountRedBalls();
     }
 
-    //получение процентов в корзине
+    //get procents in basket
     int getProcentGetBlueBall() const
     {
         if (countBlueBalls == 0) {
@@ -72,9 +70,7 @@ public:
             return 0;
         }
 
-        double allProcentBlueBalls = ((double) (AllCountBlueBalls(second))
-                                      / (double) (allCount + second.allCount))
-                                     * 100;
+        double allProcentBlueBalls = ((double) (AllCountBlueBalls(second))/ (double) (allCount + second.allCount)) * 100;
         if ((allProcentBlueBalls - (int) allProcentBlueBalls) >= 0.5) {
             allProcentBlueBalls += 1;
         }
@@ -101,9 +97,7 @@ public:
             return 0;
         }
 
-        double allProcentRedBalls = ((double) (AllCountRedBalls(second))
-                                     / (double) (allCount + second.allCount))
-                                    * 100;
+        double allProcentRedBalls = ((double) (AllCountRedBalls(second)) / (double) (allCount + second.allCount)) * 100;
         if ((allProcentRedBalls - (int) allProcentRedBalls) >= 0.5) {
             allProcentRedBalls += 1;
         }
@@ -117,14 +111,12 @@ public:
         if ((getAllProcentGetBlueBall(second) + getAllProcentGetRedBall(second)) == 0) {
             return 0;
         }
-        int procentOneRedOneBlue = 100
-                                   - (getAllProcentGetBlueBall(second)
-                                      + getAllProcentGetRedBall(second));
+        int procentOneRedOneBlue = 100 - (getAllProcentGetBlueBall(second) + getAllProcentGetRedBall(second));
 
         return procentOneRedOneBlue;
     }
 
-    //базовые добавить убавить количество шаров без проверки
+    //base sub add balls
     void addBlueBall(int countBalls)
     {
         countBlueBalls = countBlueBalls + countBalls;
@@ -184,7 +176,6 @@ public:
         } else if (changesFlag & 1 << 9) {
             return "Последнее действие: извлекли 1 синий и 1 красный шар";
         } else {
-            std::cout << changesFlag << std::endl;
             return "Последнее действие: none";
         }
         return "";
