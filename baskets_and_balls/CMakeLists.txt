@@ -9,16 +9,16 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Test)  # Добавлен Test
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Test)  # Добавлен Test
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Test)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Test)
 
-# Создаем библиотеку ПЕРЕД основным таргетом
+
 add_library(baskets_lib STATIC
     baskets.cpp
     baskets.h
 )
-target_link_libraries(baskets_lib PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)  # Линковка для библиотеки
-set_target_properties(baskets_lib PROPERTIES AUTOMOC ON)  # Включение AUTOMOC для библиотеки
+target_link_libraries(baskets_lib PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+set_target_properties(baskets_lib PROPERTIES AUTOMOC ON)
 
 set(PROJECT_SOURCES
     main.cpp
