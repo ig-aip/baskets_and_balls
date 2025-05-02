@@ -320,7 +320,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Переложить шар в корзину 1</string>
+     <string>Убрать 2 шара</string>
     </property>
    </widget>
   </widget>
