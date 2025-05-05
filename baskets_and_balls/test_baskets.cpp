@@ -45,7 +45,8 @@ void TestBaskets::testHardProcentBlue(){
 
     QCOMPARE(first.getProcentGetBlueBall(), 75);
     QCOMPARE(second.getProcentGetRedBall(), 50);
-    QCOMPARE(first.getAllProcentGetBlueBall(second), 39);
+    QCOMPARE(first.getAllProcentGetBlueBall(second), 36);
+    QCOMPARE(first.getProcentOneRedOneBlueBalls(second), 53);
 }
 
 void TestBaskets::testHardProcentRed(){
@@ -54,7 +55,7 @@ void TestBaskets::testHardProcentRed(){
 
     QCOMPARE(first.getProcentGetBlueBall(), 75);
     QCOMPARE(second.getProcentGetRedBall(), 50);
-    QCOMPARE(first.getAllProcentGetRedBall(second), 14);
+    QCOMPARE(first.getAllProcentGetRedBall(second), 11);
 }
 
 void TestBaskets::testSetChangesFlag(){

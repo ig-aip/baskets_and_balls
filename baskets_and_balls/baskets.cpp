@@ -88,12 +88,13 @@ int Baskets::getAllProcentGetBlueBall(const Baskets &second) const
     {
         return 0;
     }
+    int countAllVariants = (allCount + second.getAllCount()) * (allCount + second.getAllCount() - 1);
+    int countTwoBlueVariants = (countBlueBalls + second.getCountBlueBalls()) * ((countBlueBalls + second.getCountBlueBalls()) - 1);
 
-    double allProcentBlueBalls = ((double) (AllCountBlueBalls(second))/ (double) (allCount + second.allCount)) * 100;
+    double allProcentBlueBalls =((double)countTwoBlueVariants / (double)countAllVariants) * 100;
     if ((allProcentBlueBalls - (int) allProcentBlueBalls) >= 0.5) {
         allProcentBlueBalls += 1;
     }
-    allProcentBlueBalls = ((int) allProcentBlueBalls * (int) allProcentBlueBalls) / 100;
 
     if(allProcentBlueBalls < 1){ return 1; }
     return (int) allProcentBlueBalls;
@@ -121,12 +122,14 @@ int Baskets::getAllProcentGetRedBall(const Baskets &second) const
         return 0;
     }
 
-    double allProcentRedBalls = ((double) (AllCountRedBalls(second)) / (double) (allCount + second.allCount)) * 100;
+    int countAllVariants = (allCount + second.getAllCount()) * (allCount + second.getAllCount() - 1);
+    int countTwoRedVariants = (countRedBalls + second.getCountRedBalls()) * ((countRedBalls + second.getCountRedBalls()) - 1);
+
+    double allProcentRedBalls =((double)countTwoRedVariants / (double)countAllVariants) * 100;
     if ((allProcentRedBalls - (int) allProcentRedBalls) >= 0.5)
     {
         allProcentRedBalls += 1;
     }
-    allProcentRedBalls = (allProcentRedBalls *  allProcentRedBalls) / 100;
 
     if(allProcentRedBalls < 1){ return 1; }
 
@@ -135,7 +138,7 @@ int Baskets::getAllProcentGetRedBall(const Baskets &second) const
 
 int Baskets::getProcentOneRedOneBlueBalls(const Baskets &second) const
 {
-    if ((getAllProcentGetBlueBall(second) + getAllProcentGetRedBall(second)) == 0)
+    if ((getAllProcentGetBlueBall(second) + getAllProcentGetRedBall(second)) == 0 && (countBlueBalls + second.getCountBlueBalls() == 0) || (countRedBalls + second.getCountRedBalls() == 0))
     {
         return 0;
     }

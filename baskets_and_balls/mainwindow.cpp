@@ -4,8 +4,8 @@
 #include "QLabel"
 #include "QString"
 
-Baskets first(3, 1);
-Baskets second(2, 2);
+Baskets first(2, 2);
+Baskets second(0, 3);
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
