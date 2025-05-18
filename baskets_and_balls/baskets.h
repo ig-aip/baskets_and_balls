@@ -6,7 +6,6 @@
 class Baskets
 {
 private:
-    static QVector<Baskets> basketVec;
     int countBlueBalls;
     int countRedBalls;
     int allCount;
@@ -66,9 +65,6 @@ public:
 
     int getProcentOneRedOneBlueBalls(const QVector<Baskets> & basketVec) const;
 
-    void getValidIndxSubOneBasket(const QVector<Baskets> & basketVec,  QVector<int> validIndx, const char color, QVector<int> & vecSubOne);
-
-    void getValidIndxSubTwoBasket(const QVector<Baskets> & basketVec,  QVector<int> validIndx, const char color, QVector<int> & vecSubOne);
 
     //Валидация для randInt
     int validTwoBlueBalls(QVector<Baskets> & basketVec);
@@ -76,6 +72,10 @@ public:
     int validTwoRedBalls(QVector<Baskets> & basketVec);
 
     int validMixedBalls(QVector<Baskets> & basketVec);
+
+    void getValidIndxSubOneBasket(const QVector<Baskets> & basketVec,  QVector<int> validIndx, const char color, QVector<int> & vecSubOne);
+
+    void getValidIndxSubTwoBasket(const QVector<Baskets> & basketVec,  QVector<int> validIndx, const char color, QVector<int> & vecSubOne);
 
 
     //Добавить/Убавить
@@ -94,12 +94,6 @@ public:
     void subMixedBallsOneBasket(QVector<Baskets> & basketVec, int randInt);
 
     void subMixedBallsTwoBasket(QVector<Baskets> & basketVec, int randInt);
-
-    void subOneBlueOneRedFirstBasket(QVector<Baskets> & basketVec, int randInt);
-
-    void subOneBlueOneRedSecondBasket(QVector<Baskets> & basketVec, int randInt);
-
-    void subOneBlueOneRedMixedBaskets(QVector<Baskets> & basketVec, int randInt);
 
 
     //Получение последних изменений
