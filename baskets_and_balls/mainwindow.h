@@ -2,6 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QVector>
+#include <QGroupBox>
+#include <QLabel>
+#include <QPushButton>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -18,15 +22,24 @@ public:
     ~MainWindow();
 
 private slots:
-
-    void on_firstReplaceBall_clicked();
-
-    void on_secondReplaceBall_clicked();
+    void on_replaceBall_clicked();
 
     void on_subTwoButton_clicked();
 
 private:
+    void createBasketsWidgets();
     void updateUI();
+
     Ui::MainWindow *ui;
+    QVector<QGroupBox*> basketLabels;
+    QVector<QLabel*> countAllLabels;
+    QVector<QLabel*> countBlueLabels;
+    QVector<QLabel*> countRedLabels;
+    QVector<QLabel*> procentBlueLabels;
+    QVector<QLabel*> procentRedLabels;
+    QVector<QLabel*> lustChangesLabels;
+    QVector<QPushButton*> replaceOneBallButtons;
+
+    QLayout* basketsLayOut = nullptr;
 };
 #endif // MAINWINDOW_H

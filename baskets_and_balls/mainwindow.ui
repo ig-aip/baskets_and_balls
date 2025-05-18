@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1105</width>
+    <width>1329</width>
     <height>695</height>
    </rect>
   </property>
@@ -14,242 +14,23 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="firstGroupBox">
+   <widget class="QPushButton" name="subTwoButton">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>110</y>
-      <width>391</width>
-      <height>221</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Первая корзина</string>
-    </property>
-    <widget class="QWidget" name="gridLayoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>10</y>
-       <width>391</width>
-       <height>211</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="firstGridLayout">
-      <item row="4" column="0">
-       <widget class="QLabel" name="firstProcentGetBlueBall">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Вероятность достать синий шар:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="firstCountBlueBalls">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Синих шаров в корзине:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="firstLustChange">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Последнее действие:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="firstProcentGetRedBall">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Вероятность достать красный шар:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="firstCountBalls">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Шаров в корзине:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="firstCountRedBalls">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Красных шаров в корзине:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="secondGroupBox">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>110</y>
-      <width>391</width>
-      <height>221</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Вторая корзина</string>
-    </property>
-    <widget class="QWidget" name="gridLayoutWidget_2">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>10</y>
-       <width>391</width>
-       <height>211</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="secondGridLayout">
-      <item row="1" column="0">
-       <widget class="QLabel" name="secondCountBalls">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Шаров в корзине:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="secondProcentGetRedBall">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Вероятность достать красный шар:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="secondCountRedBalls">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Красных шаров в корзине:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="secondLustChange">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Последнее действие:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="secondCountBlueBalls">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Синих шаров в корзине:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="secondProcentGetBlueBall">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Вероятность достать синий шар:</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </widget>
-   <widget class="QPushButton" name="firstReplaceBall">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>340</y>
+      <x>540</x>
+      <y>600</y>
       <width>389</width>
       <height>24</height>
      </rect>
     </property>
     <property name="text">
-     <string>Переложить шар в корзину 2</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="secondReplaceBall">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>340</y>
-      <width>389</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Переложить шар в корзину 1</string>
+     <string>Убрать 2 шара</string>
     </property>
    </widget>
    <widget class="QGroupBox" name="firstGroupBox_2">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>540</x>
       <y>380</y>
       <width>391</width>
       <height>221</height>
@@ -310,18 +91,16 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QPushButton" name="subTwoButton">
+   <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>600</y>
-      <width>389</width>
-      <height>24</height>
+      <x>10</x>
+      <y>9</y>
+      <width>1311</width>
+      <height>351</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Убрать 2 шара</string>
-    </property>
+    <layout class="QHBoxLayout" name="basketsContainer"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -329,7 +108,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1105</width>
+     <width>1329</width>
      <height>22</height>
     </rect>
    </property>

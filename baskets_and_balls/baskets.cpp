@@ -2,6 +2,7 @@
 #include "QRandomGenerator"
 
 
+
 Baskets::Baskets() : countBlueBalls(0), countRedBalls(0), allCount(0){}
 
 Baskets::Baskets(int blueBalls, int redBalls) : countBlueBalls(blueBalls), countRedBalls(redBalls), allCount(redBalls + blueBalls) {}
@@ -15,21 +16,21 @@ int Baskets::getAllCount() const { return allCount; }
 
 void Baskets::setChangesFlag(const short changes) { changesFlag = changes; }
 
-void Baskets::setRandomChangesFlag(const Baskets & second){
+void Baskets::setRandomChangesFlag(const QVector<Baskets> & basketVec){
     int randInt = 0;
     randInt = QRandomGenerator::global()->bounded(1, 101);
-    if (randInt <= getAllProcentGetBlueBall(second) && (AllCountBlueBalls(second)) >= 2)
+    if (randInt <= getAllProcentGetBlueBall(basketVec) && (allCountBlueBalls(basketVec)) >= 2)
     {
-        changesFlag = changesFlag | 1 << 2; //Удалить 2 синих шара
+        changesFlag =  1 << 2; //Удалить 2 синих шара
     }
-    else if ((getAllProcentGetBlueBall(second) < randInt) && (randInt <= (getAllProcentGetRedBall(second) + getAllProcentGetBlueBall(second)))
-               && (AllCountRedBalls(second)) >= 2)
+    else if ((getAllProcentGetBlueBall(basketVec) < randInt) && (randInt <= (getAllProcentGetRedBall(basketVec) + getAllProcentGetBlueBall(basketVec)))
+               && (allCountRedBalls(basketVec)) >= 2)
     {
-        changesFlag = changesFlag | 1 << 3; //Удалить 2 красных шара
+        changesFlag =  1 << 3; //Удалить 2 красных шара
     }
-    else if (AllCountBlueBalls(second) >= 1 && AllCountRedBalls(second) >= 1)
+    else if (allCountBlueBalls(basketVec) >= 1 && allCountRedBalls(basketVec) >= 1)
     {
-        changesFlag = changesFlag | 1 << 4; //Удалить 2 смешанных шара
+        changesFlag =  1 << 4; //Удалить 2 смешанных шара
     }
 }
 
@@ -37,35 +38,69 @@ short Baskets::getChangesFlag() const{
     return changesFlag;
 }
 
-int Baskets::AllCountBlueBalls(const Baskets &second) const
+int Baskets::allCountBlueBalls(const QVector<Baskets> & basketVec) const
 {
-    return getCountBlueBalls() + second.getCountBlueBalls();
+    int allBlue = 0;
+    for(Baskets b : basketVec){
+        allBlue += b.getCountBlueBalls();
+    }
+    return allBlue;
 }
 
-int Baskets::AllCountRedBalls(const Baskets &second) const
+int Baskets::allCountRedBalls(const QVector<Baskets> & basketVec) const
 {
-    return getCountRedBalls() + second.getCountRedBalls();
+    int allRed = 0;
+    for(Baskets b : basketVec){
+        allRed += b.getCountRedBalls();
+    }
+    return allRed;
 }
 
-int Baskets::getCorrectRandInt(const Baskets& second) const{
-    int randInt = QRandomGenerator::global()->bounded(3);
+int Baskets::allCountAllBaskets(const QVector<Baskets> & basketVec) const
+{
+    int allBalls = 0;
+    for(Baskets b : basketVec){
+        allBalls += b.getAllCount();
+    }
+    return allBalls;
+}
 
-    if (second.getAllCount() == 0)
+int Baskets::getCorrectRandInt(QVector<Baskets> & basketVec) const{
+    int randInt = -1;
+
+    if(changesFlag == 1 << 2)
     {
-        return 0;
+        return basketVec[0].validTwoBlueBalls(basketVec);
     }
-    else if (allCount == 0)
+    else if(changesFlag == 1 << 3)
     {
-        return 1;
+        return basketVec[0].validTwoRedBalls(basketVec);
     }
-    else if (allCount == 1 && second.getAllCount() == 1)
+    else if(changesFlag == 1 << 4)
     {
-        return 2;
+        return basketVec[0].validMixedBalls(basketVec);
     }
+
 
     return randInt;
 }
 
+int Baskets::getRandomSelectBasketExcept(const QVector<Baskets> & basketVec, const int exceptIndx){
+    QVector<int> validNumbers;
+
+    for(int i = 0; i < basketVec.size(); ++i){
+        if(i != exceptIndx){
+            validNumbers.push_back(i);
+        }
+    }
+
+    int insertIndx = QRandomGenerator::global()->bounded( validNumbers.size());
+    return validNumbers[insertIndx];
+}
+
+
+
+//получение процентов
 
 int Baskets::getProcentGetBlueBall() const
 {
@@ -82,14 +117,14 @@ int Baskets::getProcentGetBlueBall() const
     return (int) procent;
 }
 
-int Baskets::getAllProcentGetBlueBall(const Baskets &second) const
+int Baskets::getAllProcentGetBlueBall(const QVector<Baskets> & basketVec) const
 {
-    if ((countBlueBalls + second.countBlueBalls) < 2)
+    if ((allCountBlueBalls(basketVec)) < 2)
     {
         return 0;
     }
-    int countAllVariants = (allCount + second.getAllCount()) * (allCount + second.getAllCount() - 1);
-    int countTwoBlueVariants = (countBlueBalls + second.getCountBlueBalls()) * ((countBlueBalls + second.getCountBlueBalls()) - 1);
+    int countAllVariants = (allCountAllBaskets(basketVec)) * (allCountAllBaskets(basketVec) - 1);
+    int countTwoBlueVariants = (allCountBlueBalls(basketVec)) * (allCountBlueBalls(basketVec) - 1);
 
     double allProcentBlueBalls =((double)countTwoBlueVariants / (double)countAllVariants) * 100;
     if ((allProcentBlueBalls - (int) allProcentBlueBalls) >= 0.5) {
@@ -115,15 +150,15 @@ int Baskets::getProcentGetRedBall() const
     return (int) procent;
 }
 
-int Baskets::getAllProcentGetRedBall(const Baskets &second) const
+int Baskets::getAllProcentGetRedBall(const QVector<Baskets> & basketVec) const
 {
-    if ((AllCountRedBalls(second)) < 2)
+    if ((allCountRedBalls(basketVec)) < 2)
     {
         return 0;
     }
 
-    int countAllVariants = (allCount + second.getAllCount()) * (allCount + second.getAllCount() - 1);
-    int countTwoRedVariants = (countRedBalls + second.getCountRedBalls()) * ((countRedBalls + second.getCountRedBalls()) - 1);
+    int countAllVariants = (allCountAllBaskets(basketVec)) * (allCountAllBaskets(basketVec) - 1);
+    int countTwoRedVariants = (allCountRedBalls(basketVec)) * (allCountRedBalls(basketVec) - 1);
 
     double allProcentRedBalls =((double)countTwoRedVariants / (double)countAllVariants) * 100;
     if ((allProcentRedBalls - (int) allProcentRedBalls) >= 0.5)
@@ -136,15 +171,193 @@ int Baskets::getAllProcentGetRedBall(const Baskets &second) const
     return (int) allProcentRedBalls;
 }
 
-int Baskets::getProcentOneRedOneBlueBalls(const Baskets &second) const
+int Baskets::getProcentOneRedOneBlueBalls(const QVector<Baskets> & basketVec) const
 {
-    if ((getAllProcentGetBlueBall(second) + getAllProcentGetRedBall(second)) == 0 && (countBlueBalls + second.getCountBlueBalls() == 0) || (countRedBalls + second.getCountRedBalls() == 0))
+    if ((getAllProcentGetBlueBall(basketVec) + getAllProcentGetRedBall(basketVec)) == 0 && (allCountBlueBalls(basketVec) == 0) || (allCountRedBalls(basketVec) == 0))
     {
         return 0;
     }
-    int procentOneRedOneBlue = 100 - (getAllProcentGetBlueBall(second) + getAllProcentGetRedBall(second));
+    int procentOneRedOneBlue = 100 - (getAllProcentGetBlueBall(basketVec) + getAllProcentGetRedBall(basketVec));
 
     return procentOneRedOneBlue;
+}
+
+void Baskets::getValidIndxSubOneBasket(const QVector<Baskets> & basketVec,  QVector<int> validIndx, const char color, QVector<int> & vecSubOne)
+{
+    for(int i = 0; i < validIndx.size(); ++i){
+        if(color == 'b')
+        {
+            if(basketVec[validIndx[i]].getCountBlueBalls() >= 2){ vecSubOne.push_back(validIndx[i]);  }
+        }
+        else if(color == 'r')
+        {
+            if(basketVec[validIndx[i]].getCountRedBalls() >= 2){ vecSubOne.push_back(validIndx[i]);  }
+        }
+        else if(color == 'm')
+        {
+            if(basketVec[validIndx[i]].getCountBlueBalls() >= 1 && basketVec[validIndx[i]].getCountRedBalls() >= 1){ vecSubOne.push_back(validIndx[i]);  }
+        }
+    }
+}
+
+void Baskets::getValidIndxSubTwoBasket(const QVector<Baskets> & basketVec,  QVector<int> validIndx, const char color, QVector<int> & vecSubTwo)
+{
+    int countBasketHaveMinBlue = 0;
+    int countBasketHaveMinRed = 0;
+
+    for(int i = 0; i < validIndx.size(); ++i){
+        if(color == 'b')
+        {
+            if(basketVec[validIndx[i]].getCountBlueBalls() >= 1){ vecSubTwo.push_back(validIndx[i]); }
+        }
+        else if(color == 'r')
+        {
+            if(basketVec[validIndx[i]].getCountRedBalls() >= 2){ vecSubTwo.push_back(validIndx[i]);  }
+        }
+        else if(color == 'm')
+        {
+            int randInt = 0;
+            if(basketVec[validIndx[i]].getCountBlueBalls() >= 1 && basketVec[validIndx[i]].getCountRedBalls() >= 1)
+            {
+                randInt = QRandomGenerator::global()->bounded(2);
+                if(randInt == 0){ countBasketHaveMinBlue += 1; }
+                else if(randInt == 1){ countBasketHaveMinRed += 1; }
+            }
+            else if(basketVec[validIndx[i]].getCountBlueBalls() >= 1 && basketVec[validIndx[i]].getCountRedBalls() == 0)
+            {
+                countBasketHaveMinBlue += 1;
+            }
+            else if(basketVec[validIndx[i]].getCountBlueBalls() == 0 && basketVec[validIndx[i]].getCountRedBalls() >= 1)
+            {
+                countBasketHaveMinRed += 1;
+            }
+        }
+    }
+    if(color == 'm'){
+        vecSubTwo.push_back(countBasketHaveMinBlue);
+        vecSubTwo.push_back(countBasketHaveMinRed);
+    }
+}
+
+//Валидация для randInt
+
+int Baskets::validTwoBlueBalls(QVector<Baskets> & basketVec)
+{
+    Baskets buffer;
+
+    int randInt = 0;
+    QVector<int> validIndx;
+
+    for(int i = 0; i < basketVec.size(); ++i){
+        if(basketVec[i].getCountBlueBalls() >= 1){
+            validIndx.push_back(i);
+        }
+    }
+
+    QVector<int> vecSubOne;
+    QVector<int> vecSubTwo;
+
+    buffer.getValidIndxSubOneBasket(basketVec, validIndx,'b', vecSubOne );
+    buffer.getValidIndxSubTwoBasket(basketVec, validIndx,'b', vecSubTwo);
+
+    if(vecSubOne.size() == 0 && vecSubTwo.size() > 1){ return basketVec.size();}
+
+    if(vecSubOne.size() >= 1 && vecSubTwo.size() < 2){
+        randInt = QRandomGenerator::global()->bounded(vecSubOne.size());
+        return vecSubOne[randInt];
+    }
+
+    randInt = QRandomGenerator::global()->bounded(2);
+
+    if(randInt == 0 && vecSubOne.size() >= 1){
+        randInt = QRandomGenerator::global()->bounded(vecSubOne.size());
+        return vecSubOne[randInt];
+    }
+    else{
+        return basketVec.size();
+    }
+
+    return -1;
+}
+
+int Baskets::validTwoRedBalls(QVector<Baskets> & basketVec)
+{
+    Baskets buffer;
+
+    int randInt = 0;
+    QVector<int> validIndx;
+
+    for(int i = 0; i < basketVec.size(); ++i){
+        if(basketVec[i].getCountRedBalls() >= 1){
+            validIndx.push_back(i);
+        }
+    }
+
+    QVector<int> vecSubOne;
+    QVector<int> vecSubTwo;
+
+    buffer.getValidIndxSubOneBasket(basketVec, validIndx,'r', vecSubOne );
+    buffer.getValidIndxSubTwoBasket(basketVec, validIndx,'r', vecSubTwo);
+
+    if(vecSubOne.size() == 0 && vecSubTwo.size() > 1){ return basketVec.size();}
+
+    if(vecSubOne.size() >= 1 && vecSubTwo.size() < 2){
+        randInt = QRandomGenerator::global()->bounded(vecSubOne.size());
+        return vecSubOne[randInt];
+    }
+
+    randInt = QRandomGenerator::global()->bounded(2);
+
+    if(randInt == 0 && vecSubOne.size() >= 1){
+        randInt = QRandomGenerator::global()->bounded(vecSubOne.size());
+        return vecSubOne[randInt];
+    }
+    else{
+        return basketVec.size();
+    }
+
+    return -1;
+
+}
+
+int Baskets::validMixedBalls(QVector<Baskets> & basketVec)
+{
+    Baskets buffer;
+
+    int randInt = 0;
+    QVector<int> validIndx;
+
+    for(int i = 0; i < basketVec.size(); ++i){
+        if(basketVec[i].getCountBlueBalls() >= 1 || basketVec[i].getCountRedBalls() >= 1){
+            validIndx.push_back(i);
+        }
+    }
+
+    QVector<int> vecSubOne;
+    QVector<int> vecSubTwo;
+
+    buffer.getValidIndxSubOneBasket(basketVec, validIndx,'m', vecSubOne );
+    buffer.getValidIndxSubTwoBasket(basketVec, validIndx,'m', vecSubTwo);
+
+
+    if(vecSubOne.size() == 0 && vecSubTwo[0] >= 1 && vecSubTwo[1] >= 1){ return basketVec.size();}
+    if(vecSubOne.size() >= 1 && vecSubTwo[0] == 0 || vecSubTwo[1] == 0){
+        randInt = QRandomGenerator::global()->bounded(vecSubOne.size());
+        return vecSubOne[randInt];
+    }
+
+    randInt = QRandomGenerator::global()->bounded(2);
+
+    if(randInt == 0 && vecSubOne.size() >= 1){
+        randInt = QRandomGenerator::global()->bounded(vecSubOne.size());
+        return vecSubOne[randInt];
+    }
+    else{
+        return basketVec.size();
+    }
+
+    return -1;
+
 }
 
 
@@ -170,189 +383,160 @@ void Baskets::subRedBall(const int countBalls)
     allCount -= countBalls;
 }
 
-void Baskets::subTwoBlueBalls(Baskets & second, int randInt){
-    if (randInt == 0 && (getCountBlueBalls() >= 2))
-    {
-        subBlueBall(2);
-        changesFlag = 1 << 5;
-    }
-    else if (randInt == 1 && (second.getCountBlueBalls() >= 2))
-    {
-        second.subBlueBall(2);
-        second.setChangesFlag(1 << 5);
-    }
-    else if (randInt == 2 && (getCountBlueBalls() >= 1) && (second.getCountBlueBalls() >= 1))
-    {
-        subBlueBall(1);
-        second.subBlueBall(1);
-        changesFlag = 1 << 6;
-        second.setChangesFlag(1 << 6);
-    }
-}
-
-void Baskets::subTwoRedBalls(Baskets& second, int randInt){
-    if (randInt == 0 && (countRedBalls >= 2))
-    {
-        subRedBall(2);
-        changesFlag = 1 << 7;
-    }
-    else if (randInt == 1 && (second.getCountRedBalls() >= 2))
-    {
-        second.subRedBall(2);
-        second.setChangesFlag(1 << 7);
-    }
-    else if (randInt == 2 && (countRedBalls >= 1) && (second.getCountRedBalls() >= 1))
-    {
-        subRedBall(1);
-        second.subRedBall(1);
-        changesFlag = 1 << 8;
-        second.setChangesFlag(1 << 8);
-    }
-}
-
-void Baskets::subOneBlueOneRedFirstBasket(Baskets& second, int randInt){
-    if (countBlueBalls > 0 && countRedBalls > 0) {
-        subBlueBall(1);
-        subRedBall(1);
-        changesFlag = 1 << 9;
-    }
-    else
-    {
-        if (countBlueBalls == 0 && countRedBalls == 0)
+void Baskets::subTwoBlueBalls(QVector<Baskets> & basketVec, int randInt){
+    for(int i = 0; i <= basketVec.size(); ++i){
+        if(randInt == i && i != basketVec.size())
         {
-            second.subBlueBall(1);
-            second.subRedBall(1);
-            second.setChangesFlag(1 << 9);
+            basketVec[randInt].subBlueBall(2);
+            basketVec[randInt].setChangesFlag(1 << 5);
+            return;
         }
-        else if (countBlueBalls == 0)
+        else if(randInt == i && i == basketVec.size())
         {
-            subRedBall(1);
-            second.subBlueBall(1);
-            changesFlag = 1 << 8;
-            second.setChangesFlag(1 << 6);
-        }
-        else if (countRedBalls == 0)
-        {
-            subBlueBall(1);
-            second.subRedBall(1);
-            changesFlag = 1 << 6;
-            second.setChangesFlag(1 << 8);
+            QVector<int> validIndx;
+            for(int ii = 0; ii < basketVec.size(); ++ii){
+                if(basketVec[ii].getCountBlueBalls() > 0){
+                    validIndx.push_back(ii);
+                }
+            }
+
+            if(validIndx.size() > 1){
+                int randIndx = QRandomGenerator::global()->bounded(validIndx.size());
+                basketVec[validIndx[randIndx]].subBlueBall(1);
+                basketVec[validIndx[randIndx]].setChangesFlag(1 << 6);
+
+                validIndx.removeAt(randIndx);
+                randIndx = QRandomGenerator::global()->bounded(validIndx.size());
+                basketVec[validIndx[randIndx]].subBlueBall(1);
+                basketVec[validIndx[randIndx]].setChangesFlag(1 << 6);
+                return;
+            }
         }
     }
 }
 
-void Baskets::subOneBlueOneRedSecondBasket(Baskets& second, int randInt){
-    if (second.getCountBlueBalls() > 0 && second.getCountRedBalls() > 0)
-    {
-        second.subBlueBall(1); //sub 1 blue, 1 red ball in second basket
-        second.subRedBall(1);
-        second.setChangesFlag(1 << 9);
-    }
-    else
-    {
-        if (second.getCountBlueBalls() == 0 && second.getCountRedBalls() == 0)
+void Baskets::subTwoRedBalls(QVector<Baskets> & basketVec, int randInt){
+    for(int i = 0; i <= basketVec.size(); ++i){
+        if(randInt == i && i != basketVec.size())
         {
-            subBlueBall(1);
-            subRedBall(1);
-            changesFlag = 1 << 9;
+            basketVec[randInt].subRedBall(2);
+            basketVec[randInt].setChangesFlag(1 << 7);
+            return;
         }
-        else if (second.getCountBlueBalls() == 0)
+        else if(randInt == i && i == basketVec.size())
         {
-            second.subRedBall(1);
-            subBlueBall(1);
-            second.setChangesFlag(1 << 8);
-            changesFlag = 1 << 6;
-        }
-        else if (second.getCountRedBalls() == 0)
-        {
-            second.subBlueBall(1);
-            subRedBall(1);
-            second.setChangesFlag(1 << 6);
-            changesFlag = 1 << 8;
-        }
-    }
-}
-void Baskets::subOneBlueOneRedMixedBaskets(Baskets& second, int randInt){
-    if ((countBlueBalls >= 1 && second.countRedBalls >= 1)
-        || (countRedBalls >= 1 && second.countBlueBalls >= 1))
-    {
-        if ((countBlueBalls >= 1 && second.countRedBalls >= 1)
-            && (countRedBalls >= 1 && second.countBlueBalls >= 1))
-        {
-            if (QRandomGenerator::global()->bounded(2) == 1)
-            {
-                subBlueBall(1);
-                second.subRedBall(1);
-                changesFlag = 1 << 6;
-                second.setChangesFlag(1 << 8);
+            QVector<int> validIndx;
+            for(int i = 0; i < basketVec.size(); ++i){
+                if(basketVec[i].getCountRedBalls() > 0){
+                    validIndx.push_back(i);
+                }
             }
-            else
-            {
-                subRedBall(1);
-                second.subBlueBall(1);
-                changesFlag = 1 << 8;
-                second.setChangesFlag(1 << 6);
-            }
-        }
-        else if (countBlueBalls >= 1 && second.countRedBalls >= 1)
-        {
-            subBlueBall(1);
-            second.subRedBall(1);
-            changesFlag = 1 << 6;
-            second.setChangesFlag(1 << 8);
-        }
-        else if (countRedBalls >= 1 && second.countBlueBalls >= 1)
-        {
-            subRedBall(1);
-            second.subBlueBall(1);
-            changesFlag = 1 << 8;
-            second.setChangesFlag(1 << 6);
-        }
-        else if (countBlueBalls == 0 || second.countRedBalls == 0)
-        {
-            if (countBlueBalls == 0 && second.getCountRedBalls() == 0)
-            {
-                second.subBlueBall(1);
-                subRedBall(1);
-                second.setChangesFlag(1 << 6);
-                changesFlag = 1 << 8;
-            }
-            else if (countBlueBalls == 0 && second.getCountRedBalls() >= 1)
-            {
-                second.subBlueBall(1);
-                second.subRedBall(1);
-                second.setChangesFlag(1 << 9);
-            }
-            else if (countBlueBalls >= 1 && second.getCountRedBalls() == 0) {
-                subBlueBall(1);
-                subRedBall(1);
-                changesFlag = 1 << 9;
-            }
-        }
-        else if (countRedBalls == 0 || second.getCountBlueBalls() == 0)
-        {
-            if (countRedBalls == 0 && second.getCountBlueBalls() == 0)
-            {
-                second.subRedBall(1);
-                subBlueBall(1);
-                second.setChangesFlag(1 << 8);
-                changesFlag = 1 << 6;
-            }
-            else if (countRedBalls == 0 && second.getCountBlueBalls() >= 1)
-            {
-                second.subBlueBall(1);
-                second.subRedBall(1);
-                second.setChangesFlag(1 << 9);
-            }
-            else if (countRedBalls >= 1 && second.getCountBlueBalls() == 0)
-            {
-                subBlueBall(1);
-                subRedBall(1);
-                changesFlag = 1 << 9;
+
+            if(validIndx.size() > 1){
+                int randIndx = QRandomGenerator::global()->bounded(validIndx.size());
+                basketVec[validIndx[randIndx]].subRedBall(1);
+                basketVec[validIndx[randIndx]].setChangesFlag(1 << 8);
+
+                validIndx.removeAt(randIndx);
+                randIndx = QRandomGenerator::global()->bounded(validIndx.size());
+                basketVec[validIndx[randIndx]].subRedBall(1);
+                basketVec[validIndx[randIndx]].setChangesFlag(1 << 8);
+                return;
             }
         }
     }
 }
+
+void Baskets::subMixedBallsOneBasket(QVector<Baskets> & basketVec, int randInt){
+    basketVec[randInt].subBlueBall(1);
+    basketVec[randInt].subRedBall(1);
+    basketVec[randInt].setChangesFlag(1 << 9);
+}
+
+void Baskets::subMixedBallsTwoBasket(QVector<Baskets> & basketVec, int randInt){
+    QVector<int> blueIndx;
+    QVector<int> redIndx;
+    QVector<int> blueRedIndx;
+
+    int randBlueIndx = 0;
+    int randRedIndx = 0;
+
+    for(int i = 0; i < basketVec.size(); ++i){
+        if(basketVec[i].getAllCount() >= 1){
+            if(basketVec[i].getCountBlueBalls() >= 1 && basketVec[i].getCountRedBalls() >= 1)
+            {
+                blueRedIndx.push_back(i);
+            }
+            else if(basketVec[i].getCountBlueBalls() >= 1 && basketVec[i].getCountRedBalls() == 0)
+            {
+                blueIndx.push_back(i);
+            }
+            else if(basketVec[i].getCountBlueBalls() == 0 && basketVec[i].getCountRedBalls() >= 1)
+            {
+                redIndx.push_back(i);
+            }
+        }
+    }
+
+    if(blueIndx.size() != 0 && blueRedIndx.size() != 0){
+        randInt = QRandomGenerator::global()->bounded(2);
+        if(randInt == 0)
+        {
+            randBlueIndx = QRandomGenerator::global()->bounded(blueRedIndx.size());
+            basketVec[blueRedIndx[randBlueIndx]].subBlueBall(1);
+            basketVec[blueRedIndx[randBlueIndx]].setChangesFlag(1 << 6);
+            blueRedIndx.removeAt(randBlueIndx);
+        }
+        else
+        {
+            randBlueIndx = QRandomGenerator::global()->bounded(blueIndx.size());
+            basketVec[blueIndx[randBlueIndx]].subBlueBall(1);
+            basketVec[blueIndx[randBlueIndx]].setChangesFlag(1 << 6);
+        }
+    }
+    else if( blueIndx.size() != 0 && blueRedIndx.size() == 0)
+    {
+        randBlueIndx = QRandomGenerator::global()->bounded(blueIndx.size());
+        basketVec[blueIndx[randBlueIndx]].subBlueBall(1);
+        basketVec[blueIndx[randBlueIndx]].setChangesFlag(1 << 6);
+    }
+    else if(blueIndx.size() == 0 && blueRedIndx.size() != 0)
+    {
+        randBlueIndx = QRandomGenerator::global()->bounded(blueRedIndx.size());
+        basketVec[blueRedIndx[randBlueIndx]].subBlueBall(1);
+        basketVec[blueRedIndx[randBlueIndx]].setChangesFlag(1 << 6);
+        blueRedIndx.removeAt(randBlueIndx);
+    }
+
+    if(redIndx.size() != 0 && blueRedIndx.size() != 0){
+        randInt = QRandomGenerator::global()->bounded(2);
+        if(randInt == 0)
+        {
+            randRedIndx = QRandomGenerator::global()->bounded(blueRedIndx.size());
+            basketVec[blueRedIndx[randRedIndx]].subRedBall(1);
+            basketVec[blueRedIndx[randRedIndx]].setChangesFlag(1 << 6);
+        }
+        else
+        {
+            randRedIndx = QRandomGenerator::global()->bounded(redIndx.size());
+            basketVec[redIndx[randRedIndx]].subRedBall(1);
+            basketVec[redIndx[randRedIndx]].setChangesFlag(1 << 6);
+        }
+    }
+    else if( redIndx.size() != 0 && blueRedIndx.size() == 0)
+    {
+        randRedIndx = QRandomGenerator::global()->bounded(redIndx.size());
+        basketVec[redIndx[randRedIndx]].subRedBall(1);
+        basketVec[redIndx[randRedIndx]].setChangesFlag(1 << 6);
+    }
+    else if(redIndx.size() == 0 && blueRedIndx.size() != 0)
+    {
+        randRedIndx = QRandomGenerator::global()->bounded(blueRedIndx.size());
+        basketVec[blueRedIndx[randRedIndx]].subRedBall(1);
+        basketVec[blueRedIndx[randRedIndx]].setChangesFlag(1 << 6);
+    }
+}
+
 
 const char *Baskets::getLustChanges() const
 {
@@ -384,6 +568,14 @@ const char *Baskets::getLustChanges() const
     {
         return "Последнее действие: извлекли 1 синий и 1 красный шар";
     }
+    else if(changesFlag & 1 << 10)
+    {
+        return "Последнее действие: добавили синий шар";
+    }
+    else if(changesFlag & 1 << 11)
+    {
+        return "Последнее действие: добавили красный шар";
+    }
     else
     {
         return "Последнее действие: none";
@@ -392,189 +584,93 @@ const char *Baskets::getLustChanges() const
 }
 
 
-void Baskets::replaceBall(Baskets &second)
+void Baskets::replaceBall(QVector<Baskets> & basketVec, int indx)
 {
     int randInt = 0;
-
-    if ((countBlueBalls || countRedBalls) != 0)
+    int insertIndx = getRandomSelectBasketExcept(basketVec, indx);
+    if (basketVec[indx].getCountBlueBalls() >= 1 || basketVec[indx].getCountRedBalls() >= 1)
     {
         randInt = QRandomGenerator::global()->bounded(1, 101);
-        if (randInt <= getProcentGetBlueBall())
+        if (randInt <= basketVec[indx].getProcentGetBlueBall())
         {
-            subBlueBall(1);
-            second.addBlueBall(1);
-            changesFlag = 1 << 0;
+            basketVec[indx].subBlueBall(1);
+            basketVec[insertIndx].addBlueBall(1);
+            basketVec[indx].setChangesFlag( 1 << 0);
+            basketVec[insertIndx].setChangesFlag(1 << 10);
         }
-        else
+        else if(randInt > basketVec[indx].getProcentGetBlueBall())
         {
-            subRedBall(1);
-            second.addRedBall(1);
-            changesFlag = 1 << 1;
+            basketVec[indx].subRedBall(1);
+            basketVec[insertIndx].addRedBall(1);
+            basketVec[indx].setChangesFlag(1 << 1);
+            basketVec[insertIndx].setChangesFlag(1 << 11);
         }
     }
 }
 
-void Baskets::processTwoBlue(Baskets& second, int randInt){
+void Baskets::processTwoBlue(QVector<Baskets> & basketVec, int randInt){
     changesFlag = changesFlag ^ (1 << 2);
 
-    if (randInt == 0 && (getCountBlueBalls() <= 2))
-    {
-        if (getCountBlueBalls() == 0)
-        {
-            randInt = 1;
-        }
-        if (getCountBlueBalls() == 1)
-        {
-            randInt = 2;
-        }
-    }
-    else if (randInt == 1 && second.getCountBlueBalls() <= 2)
-    {
-        if (second.getCountBlueBalls() == 0)
-        {
-            randInt = 0;
-        }
-        if (second.getCountBlueBalls() == 1)
-        {
-            randInt = 2;
-        }
-    }
-    else if (randInt == 2 && (getCountBlueBalls() == 0 || second.getCountBlueBalls() == 0))
-    {
-        if (getCountBlueBalls() == 0) {
-            randInt = 1;
-        }
-        else {
-            randInt = 0;
-        }
-    }
-
-    subTwoBlueBalls(second, randInt);
+    subTwoBlueBalls(basketVec, randInt);
 }
 
-void Baskets::processTwoRed(Baskets& second, int randInt){
+void Baskets::processTwoRed(QVector<Baskets> & basketVec, int randInt){
     changesFlag = changesFlag ^ (1 << 3);
-    if (randInt == 0 && (countRedBalls <= 2))
-    {
-        if (countRedBalls == 0) {
-            randInt = 1;
-        }
-        if (countRedBalls == 1) {
-            randInt = 2;
-        }
-    }
-    else if (randInt == 1 && second.getCountRedBalls() <= 2)
-    {
-        if (second.getCountRedBalls() == 0)
-        {
-            randInt = 0;
-        }
-        if (second.getCountRedBalls() == 1)
-        {
-            randInt = 2;
-        }
-    }
-    else if (randInt == 2 && (countRedBalls == 0 || second.getCountRedBalls() == 0))
-    {
-        if (countRedBalls == 0)
-        {
-            randInt = 1;
-        }
-        else
-        {
-            randInt = 0;
-        }
-    }
 
-    subTwoRedBalls(second, randInt);
+    subTwoRedBalls(basketVec, randInt);
 }
 
-void Baskets::processMixed(Baskets& second, int randInt){
+void Baskets::processMixed(QVector<Baskets> & basketVec, int randInt){
     changesFlag = changesFlag ^ (1 << 4);
 
-    if(randInt == 0)
+    if(randInt >= 0 && randInt < basketVec.size())
     {
-        subOneBlueOneRedFirstBasket(second, randInt);
+        subMixedBallsOneBasket(basketVec, randInt);
     }
-    else if(randInt == 1)
+    else if(randInt == basketVec.size())
     {
-        subOneBlueOneRedSecondBasket(second, randInt);
-    }
-    else if(randInt == 2)
-    {
-        subOneBlueOneRedMixedBaskets(second, randInt);
+        subMixedBallsTwoBasket(basketVec, randInt);
     }
 }
 
-void Baskets::replaceTwoBalls(Baskets &second)
+void Baskets::replaceTwoBalls(QVector<Baskets> & basketVec)
 {
-    if ((getAllCount() + second.getAllCount()) >= 2)
+    if (allCountAllBaskets(basketVec) >= 2)
     {
-        setRandomChangesFlag(second);
+        setRandomChangesFlag(basketVec);
 
-        unsigned int randInt = getCorrectRandInt(second);
+        unsigned int randInt = getCorrectRandInt(basketVec);
         //0 = вычетает 2 шара из первой корзины
         //1 = вычетает 2 шара из второй корзины
         //2 = вычетает 1 шар из первой корзины и 1 шар из второй
 
-
         if (changesFlag & 1 << 2)
         {
-            processTwoBlue(second, randInt);                   //вычетает 2 синих шара
+            processTwoBlue(basketVec, randInt);                   //вычетает 2 синих шара
         }
         else if (changesFlag & 1 << 3)
         {
-            processTwoRed(second, randInt);                    //вычетает 2 красных шара
+            processTwoRed(basketVec, randInt);                    //вычетает 2 красных шара
         }
         else if (changesFlag & 1 << 4)
         {
-            processMixed(second, randInt);                     //вычетает 2 смешанных шара
+            processMixed(basketVec, randInt);                     //вычетает 2 смешанных шара
         }
     }
 }
 
-void Baskets::determintaeReplaceTwoBalls(Baskets& second, short dChangesFlag, int dRandInt){
-    if ((getAllCount() + second.getAllCount()) >= 2)
+void Baskets::determintaeReplaceTwoBalls(QVector<Baskets>& basketVec, short dChangesFlag, int dRandInt){
+    if (dChangesFlag & 1 << 2)
     {
-        changesFlag = dChangesFlag;
-
-        unsigned int randInt = setDeterminateCorrectRandInt(second, dRandInt);
-        //0 = вычетает 2 шара из первой корзины
-        //1 = вычетает 2 шара из второй корзины
-        //2 = вычетает 1 шар из первой корзины и 1 шар из второй
-
-
-        if (changesFlag & 1 << 2)
-        {
-            processTwoBlue(second, randInt);
-        }
-        else if (changesFlag & 1 << 3)
-        {
-            processTwoRed(second, randInt);
-        }
-        else if (changesFlag & 1 << 4)
-        {
-            processMixed(second, randInt);
-        }
+        processTwoBlue(basketVec, dRandInt);                   //вычетает 2 синих шара
+    }
+    else if (dChangesFlag & 1 << 3)
+    {
+        processTwoRed(basketVec, dRandInt);                    //вычетает 2 красных шара
+    }
+    else if (dChangesFlag & 1 << 4)
+    {
+        processMixed(basketVec, dRandInt);                     //вычетает 2 смешанных шара
     }
 }
-
-int Baskets::setDeterminateCorrectRandInt(const Baskets& second, int dRandInt) const{
-    int randInt = dRandInt;
-
-    if (second.getAllCount() == 0)
-    {
-        return 0;
-    }
-    else if (allCount == 0)
-    {
-        return 1;
-    }
-    else if (allCount == 1 && second.getAllCount() == 1) {
-        return 2;
-    }
-
-    return randInt;
-}
-
 

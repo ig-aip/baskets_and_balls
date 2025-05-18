@@ -1,5 +1,7 @@
 #include <QtTest>
 #include "baskets.h"
+#include "QVector"
+
 
 class TestBaskets : public QObject
 {
@@ -10,159 +12,194 @@ private slots:
     void testReplaceBall();
     void testTwoBallsRemov();
     void testDefoultRemovTwoBalls();
-    void testHardProcentBlue();
-    void testHardProcentRed();
+    void testHardProcent();
     void testSetChangesFlag();
     void testRmTwoBlueBalls();
     void testRmTwoRedBalls();
     void testRmTwoMixedBalls();
+    void testCycleReplaceTwo();
+    void testGetCorrectRandInt();
 };
+
+void TestBaskets::testCycleReplaceTwo(){
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{1, 1}, Baskets{1, 1}, Baskets{1, 1}, Baskets{1, 1}};
+    buffer.replaceTwoBalls(basketVector);
+
+    QVERIFY(buffer.allCountAllBaskets(basketVector)  == 6);
+}
 
 void TestBaskets::testInitialization()
 {
-    Baskets first(5, 3);
-    QCOMPARE(first.getCountBlueBalls(), 5);
-    QCOMPARE(first.getCountRedBalls(), 3);
-    QCOMPARE(first.getAllCount(), 8);
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{5, 3}, Baskets{3, 5}};
+
+    QCOMPARE(buffer.allCountAllBaskets(basketVector), 16);
+    QCOMPARE(buffer.allCountBlueBalls(basketVector), 8);
+    QCOMPARE(buffer.allCountRedBalls(basketVector), 8);
 }
 
 void TestBaskets::testReplaceBall()
 {
-    Baskets first(10, 5);
-    Baskets second(2, 3);
-    int oldFirst = first.getAllCount();
-    int oldSecond = second.getAllCount();
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{5, 4}, Baskets{1, 2}};
 
-    first.replaceBall(second);
+    int oldFirst = basketVector[0].getAllCount();
+    int oldSecond = basketVector[1].getAllCount();
 
-    QCOMPARE(first.getAllCount() + second.getAllCount(), (oldFirst + oldSecond));
-    QVERIFY(first.getAllCount() == oldFirst - 1 || second.getAllCount() == oldSecond + 1);
+    basketVector[0].replaceBall(basketVector, 0);
+
+    QCOMPARE(basketVector[0].getAllCount() + basketVector[1].getAllCount(), (oldFirst + oldSecond));
+    QVERIFY(basketVector[0].getAllCount() == oldFirst - 1 || basketVector[1].getAllCount() == oldSecond + 1);
 }
 
-void TestBaskets::testHardProcentBlue(){
-    Baskets first(3, 1);
-    Baskets second(2, 2);
+void TestBaskets::testHardProcent(){
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{3, 1}, Baskets{2, 2}};
 
-    QCOMPARE(first.getProcentGetBlueBall(), 75);
-    QCOMPARE(second.getProcentGetRedBall(), 50);
-    QCOMPARE(first.getAllProcentGetBlueBall(second), 36);
-    QCOMPARE(first.getProcentOneRedOneBlueBalls(second), 53);
-}
-
-void TestBaskets::testHardProcentRed(){
-    Baskets first(3, 1);
-    Baskets second(2, 2);
-
-    QCOMPARE(first.getProcentGetBlueBall(), 75);
-    QCOMPARE(second.getProcentGetRedBall(), 50);
-    QCOMPARE(first.getAllProcentGetRedBall(second), 11);
+    QCOMPARE(basketVector[0].getProcentGetBlueBall(), 75);
+    QCOMPARE(basketVector[1].getProcentGetRedBall(), 50);
+    QCOMPARE(buffer.getAllProcentGetBlueBall(basketVector), 36);
+    QCOMPARE(buffer.getAllProcentGetRedBall(basketVector), 11);
+    QCOMPARE(buffer.getProcentOneRedOneBlueBalls(basketVector), 53);
 }
 
 void TestBaskets::testSetChangesFlag(){
-    Baskets first(0, 1);
-    Baskets second(0, 1);
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{0, 1}, Baskets{0, 0}, Baskets{0, 1}};
 
-    first.setRandomChangesFlag(second);
-    QCOMPARE(first.getChangesFlag(), 1 << 3);
+    buffer.setRandomChangesFlag(basketVector);
+    QCOMPARE(buffer.getChangesFlag(), 1 << 3);
 
-    Baskets third(1, 0);
-    Baskets fourth(1, 0);
+    QVector<Baskets> basketVector1{Baskets{1, 0}, Baskets{0, 0}, Baskets{1, 0}};
 
-    third.setRandomChangesFlag(fourth);
-    QCOMPARE(third.getChangesFlag(), 1 << 2);
+    buffer.setRandomChangesFlag(basketVector1);
+    QCOMPARE(buffer.getChangesFlag(), 1 << 2);
 
-    Baskets fifth(1, 0);
-    Baskets sixth(0, 1);
+    QVector<Baskets> basketVector2{Baskets{1, 0}, Baskets{0, 0}, Baskets{0 , 1}};
 
-    fifth.setRandomChangesFlag(sixth);
-    QCOMPARE(fifth.getChangesFlag(), 1 << 4);
+    buffer.setRandomChangesFlag(basketVector2);
+    QCOMPARE(buffer.getChangesFlag(), 1 << 4);
+
+    QVector<Baskets> basketVector3{Baskets{0, 1}, Baskets{0, 0}, Baskets{1 , 0}};
+
+    buffer.setRandomChangesFlag(basketVector3);
+    QCOMPARE(buffer.getChangesFlag(), 1 << 4);
 }
 
 void TestBaskets::testTwoBallsRemov(){
-    Baskets first(4, 4);
-    Baskets second(4, 4);
-    int initialTotal = first.getAllCount() + second.getAllCount();
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{4, 4}, Baskets{4, 4}, Baskets{4, 4}};
+    int initialTotal = buffer.allCountAllBaskets(basketVector);
 
-    first.replaceTwoBalls(second);
+    buffer.replaceTwoBalls(basketVector);
 
-    QCOMPARE(initialTotal - (first.getAllCount() + second.getAllCount()), 2);
+    QCOMPARE(initialTotal - buffer.allCountAllBaskets(basketVector), 2);
 }
 
 
 void TestBaskets::testDefoultRemovTwoBalls(){
-    Baskets first;
-    Baskets second;
-    first.replaceTwoBalls(second);
-    QCOMPARE(first.getAllCount() + second.getAllCount(), 0);
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{0, 0}, Baskets{0, 0}, Baskets{0, 0}};
 
-    Baskets third(1, 0);
-    Baskets fourth(0, 1);
-    third.replaceTwoBalls(fourth);
-    QCOMPARE(third.getAllCount() + fourth.getAllCount(), 0);
+    buffer.replaceTwoBalls(basketVector);
+    QCOMPARE(buffer.allCountAllBaskets(basketVector), 0);
+
+    QVector<Baskets> basketVector1{Baskets{1, 0}, Baskets{0, 0}, Baskets{0, 0}, Baskets{0, 1}};
+
+    buffer.replaceTwoBalls(basketVector1);
+    QCOMPARE(buffer.allCountAllBaskets(basketVector1), 0);
 }
 
 
-//проверка на вычитание двух синих шаров при случайно не возможном выборе из корзин
+
 void TestBaskets::testRmTwoBlueBalls(){
-    Baskets first(1, 0);
-    Baskets second(1, 0);
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{1, 1}, Baskets{1, 1}, Baskets{1, 1}};
 
-    first.determintaeReplaceTwoBalls(second, 1 << 2, 0);
-    QCOMPARE(first.getCountBlueBalls() + second.getCountBlueBalls(), 0);
+    buffer.determintaeReplaceTwoBalls(basketVector, 1 << 2, basketVector.size());
+    QCOMPARE(buffer.allCountBlueBalls(basketVector), 1);
 
-    Baskets third(1, 0);
-    Baskets fourth(1, 0);
+    QVector<Baskets> basketVector1{Baskets{2, 1}, Baskets{2, 1}, Baskets{2, 1}};
 
-    third.determintaeReplaceTwoBalls(fourth, 1 << 2, 1);
-    QCOMPARE(third.getCountBlueBalls() + fourth.getCountRedBalls(), 0);
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 2, 0);
+    QCOMPARE(buffer.allCountBlueBalls(basketVector1), 4);
 
-    Baskets fifth(2, 0);
-    Baskets sixth(0, 0);
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 2, 1);
+    QCOMPARE(buffer.allCountBlueBalls(basketVector1), 2);
 
-    fifth.determintaeReplaceTwoBalls(sixth, 1 << 2, 2);
-    QCOMPARE(fifth.getCountBlueBalls(), 0);
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 2, 2);
+    QCOMPARE(buffer.allCountBlueBalls(basketVector1), 0);
 }
 
-//проерка навычетание двух красных шаров при случайно не возможном выборе из корзин
+
 void TestBaskets::testRmTwoRedBalls(){
-    Baskets first(0, 1);
-    Baskets second(0, 1);
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{1, 1}, Baskets{1, 1}, Baskets{1, 1}};
 
-    first.determintaeReplaceTwoBalls(second, 1 << 3, 0);
-    QCOMPARE(first.getCountRedBalls() + second.getCountRedBalls(), 0);
+    buffer.determintaeReplaceTwoBalls(basketVector, 1 << 3, basketVector.size());
+    QCOMPARE(buffer.allCountRedBalls(basketVector), 1);
 
-    Baskets third(0, 1);
-    Baskets fourth(0, 1);
+    QVector<Baskets> basketVector1{Baskets{1, 3}, Baskets{1, 3}, Baskets{1, 3}};
 
-    third.determintaeReplaceTwoBalls(fourth, 1 << 3, 1);
-    QCOMPARE(third.getCountRedBalls() + fourth.getCountRedBalls(), 0);
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 3, 0);
+    QCOMPARE(buffer.allCountRedBalls(basketVector1), 7);
 
-    Baskets fifth(0, 0);
-    Baskets sixth(2, 0);
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 3, 1);
+    QCOMPARE(buffer.allCountRedBalls(basketVector1), 5);
 
-    fifth.determintaeReplaceTwoBalls(sixth, 1 << 3, 2);
-    QCOMPARE(fifth.getCountRedBalls(), 0);
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 3, 2);
+    QCOMPARE(buffer.allCountRedBalls(basketVector1), 3);
+
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 3, 3);
+    QCOMPARE(buffer.allCountRedBalls(basketVector1), 1);
 }
 
-//проерка навычетание двух смешанных шаров при случайно не возможном выборе из корзин
+
 void TestBaskets::testRmTwoMixedBalls(){
-    Baskets first(0, 0);
-    Baskets second(1, 1);
+    Baskets buffer;
+    QVector<Baskets> basketVector{Baskets{1, 0}, Baskets{1, 1}, Baskets{0, 1}};
 
-    first.determintaeReplaceTwoBalls(second, 1 << 4, 0);
-    QCOMPARE(second.getCountBlueBalls() + second.getCountRedBalls(), 0);
+    buffer.determintaeReplaceTwoBalls(basketVector, 1 << 4, 1);
+    QCOMPARE(basketVector[1].getAllCount(), 0);
 
-    Baskets third(1, 1);
-    Baskets fourth(0, 0);
+    QVector<Baskets> basketVector1{Baskets{2, 1}, Baskets{1, 1}, Baskets{1, 2}};
 
-    third.determintaeReplaceTwoBalls(fourth, 1 << 4, 1);
-    QCOMPARE(third.getCountBlueBalls() + third.getCountRedBalls(), 0);
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 4, 0);
+    QCOMPARE(buffer.allCountAllBaskets(basketVector1), 6);
 
-    Baskets fifth(1, 1);
-    Baskets sixth(0 , 0);
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 4, 1);
+    QCOMPARE(buffer.allCountAllBaskets(basketVector1), 4);
 
-    fifth.determintaeReplaceTwoBalls(sixth, 1 << 4, 2);
-    QCOMPARE(fifth.getCountBlueBalls() + fifth.getCountRedBalls(), 0);
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 4, 2);
+    QCOMPARE(buffer.allCountAllBaskets(basketVector1), 2);
+
+    buffer.determintaeReplaceTwoBalls(basketVector1, 1 << 4, 3);
+    QCOMPARE(buffer.allCountAllBaskets(basketVector1), 0);
+}
+
+void TestBaskets::testGetCorrectRandInt(){
+    Baskets buffer;
+
+    QVector<Baskets> basketVector{Baskets{2, 0}, Baskets{0, 0}, Baskets{0, 0}, Baskets{0, 0}};
+    buffer.setRandomChangesFlag(basketVector);
+    QCOMPARE(buffer.getCorrectRandInt(basketVector), 0);
+
+    QVector<Baskets> basketVector1{Baskets{0, 0}, Baskets{2, 0}, Baskets{0, 0}, Baskets{0, 0}};
+    buffer.setRandomChangesFlag(basketVector1);
+    QCOMPARE(buffer.getCorrectRandInt(basketVector1), 1);
+
+    QVector<Baskets> basketVector2{Baskets{0, 0}, Baskets{0, 0}, Baskets{2, 0}, Baskets{0, 0}};
+    buffer.setRandomChangesFlag(basketVector2);
+    QCOMPARE(buffer.getCorrectRandInt(basketVector2), 2);
+
+    QVector<Baskets> basketVector3{Baskets{0, 0}, Baskets{0, 0}, Baskets{0, 0}, Baskets{2, 0}};
+    buffer.setRandomChangesFlag(basketVector3);
+    QCOMPARE(buffer.getCorrectRandInt(basketVector3), 3);
+
+    QVector<Baskets> basketVector4{Baskets{1, 0}, Baskets{0, 0}, Baskets{0, 0}, Baskets{1, 0}};
+    buffer.setRandomChangesFlag(basketVector4);
+    QCOMPARE(buffer.getCorrectRandInt(basketVector4), 4);
 }
 
 QTEST_APPLESS_MAIN(TestBaskets)

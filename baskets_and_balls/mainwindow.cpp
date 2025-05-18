@@ -3,61 +3,117 @@
 #include "baskets.h"
 #include "QLabel"
 #include "QString"
+#include "QGridLayout"
+#include "jsonloader.h"
 
-Baskets first(2, 2);
-Baskets second(0, 3);
+
+JsonLoader loader;
+QVector<Baskets> basketVec = loader.loaderBasketes("parametrs.json");
+Baskets buffer;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-
     ui->setupUi(this);
+
+    if(basketVec.size() < 2 || basketVec.size() > 4){ qFatal("error count baskets");}
+
+    createBasketsWidgets();
     updateUI();
 }
 
-void MainWindow::updateUI() {
-    ui->firstCountBalls->setText(QString("Шаров в корзине: %1").arg(first.getAllCount()));
-    ui->firstCountBlueBalls->setText(QString("Синих шаров в корзине: %1").arg(first.getCountBlueBalls()));
-    ui->firstCountRedBalls->setText(QString("Красных шаров в корзине: %1").arg(first.getCountRedBalls()));
-    ui->firstProcentGetBlueBall->setText(QString("Вероятность достать синий шар: %1%").arg(first.getProcentGetBlueBall()));
-    ui->firstProcentGetRedBall->setText(QString("Вероятность достать красный шар: %1%").arg(first.getProcentGetRedBall()));
-    ui->firstLustChange->setText(first.getLustChanges());
 
-    ui->secondCountBalls->setText(QString("Шаров в корзине: %1").arg(second.getAllCount()));
-    ui->secondCountBlueBalls->setText(QString("Синих шаров в корзине: %1").arg(second.getCountBlueBalls()));
-    ui->secondCountRedBalls->setText(QString("Красных шаров в корзине: %1").arg(second.getCountRedBalls()));
-    ui->secondProcentGetBlueBall->setText(QString("Вероятность достать синий шар: %1%").arg(second.getProcentGetBlueBall()));
-    ui->secondProcentGetRedBall->setText(QString("Вероятность достать красный шар: %1%").arg(second.getProcentGetRedBall()));
-    ui->secondLustChange->setText(second.getLustChanges());
+void MainWindow::createBasketsWidgets(){
+    QHBoxLayout* container = findChild<QHBoxLayout*>("basketsContainer");
 
-    ui->procentAllBlueBalls->setText(QString("Вероятность взять 2 синих шара: %1%").arg(first.getAllProcentGetBlueBall(second)));
-    ui->procentAllRedBalls->setText(QString("Вероятность взять 2 красных шара: %1%").arg(first.getAllProcentGetRedBall(second)));
-    ui->procentOneBlueOneRed->setText(QString("Вероятность взять 1 красный и 1 синий шар: %1%").arg(first.getProcentOneRedOneBlueBalls(second)));
+    if (!container) {
+        qFatal("Не найден basketsContainer в .ui!");
+        return;
+    }
+
+    basketsLayOut = container->layout();
+
+    for(int i = 0; i  < basketVec.size(); ++i){
+        QGroupBox* groupBox = new QGroupBox(QString("%1-я корзина").arg(i + 1), this);
+        QGridLayout* layout = new QGridLayout(groupBox);
+
+        QLabel* countBalls = new QLabel(QString("Шаров в корзине: "), groupBox);
+        QLabel* countBlueBalls = new QLabel(QString("Синих шаров в корзине: "), groupBox);
+        QLabel* countRedBalls = new QLabel(QString("Красных шаров в корзине: "), groupBox);
+        QLabel* procentGetBlueBalls = new QLabel(QString("Вероятность достать синий шар: "), groupBox);
+        QLabel* procentGetRedBalls = new QLabel(QString("Вероятность достать красный шар: "), groupBox);
+        QLabel* lustChange = new QLabel(QString("Последнее изменение: "), groupBox);
+        QPushButton* btn = new QPushButton(QString("Переложить в случайную коробку"), this);
+        connect(btn, &QPushButton::clicked, this, &MainWindow::on_replaceBall_clicked);
+
+        layout->addWidget(countBalls, 0 ,0);
+        layout->addWidget(countBlueBalls, 1, 0);
+        layout->addWidget(countRedBalls, 2, 0);
+        layout->addWidget(procentGetBlueBalls, 3, 0);
+        layout->addWidget(procentGetRedBalls, 4, 0);
+        layout->addWidget(lustChange, 5, 0);
+
+        basketLabels.push_back(groupBox);
+        countAllLabels.push_back(countBalls);
+        countBlueLabels.push_back(countBlueBalls);
+        countRedLabels.push_back(countRedBalls);
+        procentBlueLabels.push_back(procentGetBlueBalls);
+        procentRedLabels.push_back(procentGetRedBalls);
+        lustChangesLabels.push_back(lustChange);
+        replaceOneBallButtons.push_back(btn);
+
+        QVBoxLayout* boxLayout = new QVBoxLayout();
+        boxLayout->addWidget(groupBox);
+        boxLayout->addWidget(btn);
+
+        QWidget* wrapper = new QWidget();
+        wrapper->setLayout(boxLayout);
+
+
+        basketsLayOut->addWidget(wrapper);
+    }
 }
+
+#if 1
+void MainWindow::updateUI() {
+    for(int i = 0; i < basketLabels.size(); ++i){
+        countAllLabels[i]->setText(QString("Шаров в корзине: %1").arg(basketVec[i].getAllCount()));
+        countBlueLabels[i]->setText(QString("Синих шаров в корзине %1").arg(basketVec[i].getCountBlueBalls()));
+        countRedLabels[i]->setText(QString("Красных шаров в корзине: %1").arg(basketVec[i].getCountRedBalls()));
+        procentBlueLabels[i]->setText(QString("Вероятность достать синий шар: %1%").arg(basketVec[i].getProcentGetBlueBall()));
+        procentRedLabels[i]->setText(QString("Вероятность достать красный шар: %1%").arg(basketVec[i].getProcentGetRedBall()));
+        lustChangesLabels[i]->setText(basketVec[i].getLustChanges());
+    }
+
+    ui->procentAllBlueBalls->setText(QString("Вероятность взять 2 синих шара: %1%").arg(buffer.getAllProcentGetBlueBall(basketVec)));
+    ui->procentAllRedBalls->setText(QString("Вероятность взять 2 красных шара: %1%").arg(buffer.getAllProcentGetRedBall(basketVec)));
+    ui->procentOneBlueOneRed->setText(QString("Вероятность взять 1 красный и 1 синий шар: %1%").arg(buffer.getProcentOneRedOneBlueBalls(basketVec)));
+
+}
+#endif
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
-void MainWindow::on_firstReplaceBall_clicked()
+void MainWindow::on_replaceBall_clicked()
 {
-    first.replaceBall(second);
+    QPushButton* senderBtn = qobject_cast<QPushButton*>(sender());
+    if(!senderBtn){ qFatal("error with buttons"); }
+
+    int indx = replaceOneBallButtons.indexOf(senderBtn);
+
+    buffer.replaceBall(basketVec, indx);
     updateUI();
 }
-
-
-void MainWindow::on_secondReplaceBall_clicked()
-{
-    second.replaceBall(first);
-    updateUI();
-}
-
 
 void MainWindow::on_subTwoButton_clicked()
 {
-    first.replaceTwoBalls(second);
+    buffer.replaceTwoBalls(basketVec);
     updateUI();
 }
+
+
 

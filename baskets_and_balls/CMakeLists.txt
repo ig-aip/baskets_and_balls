@@ -25,6 +25,9 @@ set(PROJECT_SOURCES
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
+    jsonloader.h
+    jsonloader.cpp
+    parametrs.json
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -40,9 +43,17 @@ else()
     else()
         add_executable(baskets_and_balls
             ${PROJECT_SOURCES}
+
+
         )
     endif()
 endif()
+
+add_custom_target(CopyData ALL
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/parametrs.json
+    ${CMAKE_CURRENT_BINARY_DIR}/parametrs.json
+)
 
 target_link_libraries(baskets_and_balls PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
