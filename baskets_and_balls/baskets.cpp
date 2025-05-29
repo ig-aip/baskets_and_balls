@@ -1,11 +1,11 @@
 #include "baskets.h"
 #include "QRandomGenerator"
+#include "logcreater.h"
 
 
+Baskets::Baskets() :   countBlueBalls(0), countRedBalls(0), allCount(0){}
 
-Baskets::Baskets() : countBlueBalls(0), countRedBalls(0), allCount(0){}
-
-Baskets::Baskets(int blueBalls, int redBalls) : countBlueBalls(blueBalls), countRedBalls(redBalls), allCount(redBalls + blueBalls) {}
+Baskets::Baskets(int blueBalls, int redBalls) :   countBlueBalls(blueBalls), countRedBalls(redBalls), allCount(redBalls + blueBalls) {}
 
 
 int Baskets::getCountBlueBalls() const { return countBlueBalls; }
@@ -21,16 +21,16 @@ void Baskets::setRandomChangesFlag(const QVector<Baskets> & basketVec){
     randInt = QRandomGenerator::global()->bounded(1, 101);
     if (randInt <= getAllProcentGetBlueBall(basketVec) && (allCountBlueBalls(basketVec)) >= 2)
     {
-        changesFlag =  1 << 2; //Удалить 2 синих шара
+        changesFlag =  RemoveTwoBlueMode; //Удалить 2 синих шара
     }
     else if ((getAllProcentGetBlueBall(basketVec) < randInt) && (randInt <= (getAllProcentGetRedBall(basketVec) + getAllProcentGetBlueBall(basketVec)))
                && (allCountRedBalls(basketVec)) >= 2)
     {
-        changesFlag =  1 << 3; //Удалить 2 красных шара
+        changesFlag =  RemoveTwoRedMode; //Удалить 2 красных шара
     }
     else if (allCountBlueBalls(basketVec) >= 1 && allCountRedBalls(basketVec) >= 1)
     {
-        changesFlag =  1 << 4; //Удалить 2 смешанных шара
+        changesFlag =  RemoveMixedMode; //Удалить 2 смешанных шара
     }
 }
 
@@ -68,15 +68,15 @@ int Baskets::allCountAllBaskets(const QVector<Baskets> & basketVec) const
 int Baskets::getCorrectRandInt(QVector<Baskets> & basketVec) const{
     int randInt = -1;
 
-    if(changesFlag == 1 << 2)
+    if(changesFlag == RemoveTwoBlueMode)
     {
         return basketVec[0].validTwoBlueBalls(basketVec);
     }
-    else if(changesFlag == 1 << 3)
+    else if(changesFlag == RemoveTwoRedMode)
     {
         return basketVec[0].validTwoRedBalls(basketVec);
     }
-    else if(changesFlag == 1 << 4)
+    else if(changesFlag == RemoveMixedMode)
     {
         return basketVec[0].validMixedBalls(basketVec);
     }
@@ -388,7 +388,10 @@ void Baskets::subTwoBlueBalls(QVector<Baskets> & basketVec, int randInt){
         if(randInt == i && i != basketVec.size())
         {
             basketVec[randInt].subBlueBall(2);
-            basketVec[randInt].setChangesFlag(1 << 5);
+            basketVec[randInt].setChangesFlag(MesgTwoBlueRemoved);
+            setChangesFlag(MesgTwoBlueRemoved);
+            indxForDo.first = randInt;
+
             return;
         }
         else if(randInt == i && i == basketVec.size())
@@ -401,14 +404,19 @@ void Baskets::subTwoBlueBalls(QVector<Baskets> & basketVec, int randInt){
             }
 
             if(validIndx.size() > 1){
+                setChangesFlag(MesgOneBlueRemoved);
+
                 int randIndx = QRandomGenerator::global()->bounded(validIndx.size());
                 basketVec[validIndx[randIndx]].subBlueBall(1);
-                basketVec[validIndx[randIndx]].setChangesFlag(1 << 6);
+                basketVec[validIndx[randIndx]].setChangesFlag(MesgOneBlueRemoved);
+                indxForDo.first = validIndx[randIndx];
 
                 validIndx.removeAt(randIndx);
                 randIndx = QRandomGenerator::global()->bounded(validIndx.size());
                 basketVec[validIndx[randIndx]].subBlueBall(1);
-                basketVec[validIndx[randIndx]].setChangesFlag(1 << 6);
+                basketVec[validIndx[randIndx]].setChangesFlag(MesgOneBlueRemoved);
+                indxForDo.second = validIndx[randIndx];
+
                 return;
             }
         }
@@ -420,7 +428,9 @@ void Baskets::subTwoRedBalls(QVector<Baskets> & basketVec, int randInt){
         if(randInt == i && i != basketVec.size())
         {
             basketVec[randInt].subRedBall(2);
-            basketVec[randInt].setChangesFlag(1 << 7);
+            basketVec[randInt].setChangesFlag(MesgTwoRedRemoved);
+            setChangesFlag(MesgTwoRedRemoved);
+            indxForDo.first = randInt;
             return;
         }
         else if(randInt == i && i == basketVec.size())
@@ -433,14 +443,19 @@ void Baskets::subTwoRedBalls(QVector<Baskets> & basketVec, int randInt){
             }
 
             if(validIndx.size() > 1){
+                setChangesFlag(MesgOneRedRemoved);
+
                 int randIndx = QRandomGenerator::global()->bounded(validIndx.size());
                 basketVec[validIndx[randIndx]].subRedBall(1);
-                basketVec[validIndx[randIndx]].setChangesFlag(1 << 8);
+                basketVec[validIndx[randIndx]].setChangesFlag(MesgOneRedRemoved);
+                indxForDo.first = validIndx[randIndx];
 
                 validIndx.removeAt(randIndx);
                 randIndx = QRandomGenerator::global()->bounded(validIndx.size());
                 basketVec[validIndx[randIndx]].subRedBall(1);
-                basketVec[validIndx[randIndx]].setChangesFlag(1 << 8);
+                basketVec[validIndx[randIndx]].setChangesFlag(MesgOneRedRemoved);
+                indxForDo.second = validIndx[randIndx];
+
                 return;
             }
         }
@@ -450,7 +465,9 @@ void Baskets::subTwoRedBalls(QVector<Baskets> & basketVec, int randInt){
 void Baskets::subMixedBallsOneBasket(QVector<Baskets> & basketVec, int randInt){
     basketVec[randInt].subBlueBall(1);
     basketVec[randInt].subRedBall(1);
-    basketVec[randInt].setChangesFlag(1 << 9);
+    basketVec[randInt].setChangesFlag(MesgMixedRemoved);
+    setChangesFlag(MesgMixedRemoved);
+    indxForDo.first = randInt;
 }
 
 void Baskets::subMixedBallsTwoBasket(QVector<Baskets> & basketVec, int randInt){
@@ -479,100 +496,118 @@ void Baskets::subMixedBallsTwoBasket(QVector<Baskets> & basketVec, int randInt){
     }
 
     if(blueIndx.size() != 0 && blueRedIndx.size() != 0){
+
         randInt = QRandomGenerator::global()->bounded(2);
         if(randInt == 0)
         {
+            setChangesFlag(MesgTwoMixedRemoved);
             randBlueIndx = QRandomGenerator::global()->bounded(blueRedIndx.size());
             basketVec[blueRedIndx[randBlueIndx]].subBlueBall(1);
-            basketVec[blueRedIndx[randBlueIndx]].setChangesFlag(1 << 6);
+            basketVec[blueRedIndx[randBlueIndx]].setChangesFlag(MesgOneBlueRemoved);
+            indxForDo.first = blueRedIndx[randBlueIndx];
             blueRedIndx.removeAt(randBlueIndx);
         }
         else
         {
+            setChangesFlag(MesgTwoMixedRemoved);
             randBlueIndx = QRandomGenerator::global()->bounded(blueIndx.size());
             basketVec[blueIndx[randBlueIndx]].subBlueBall(1);
-            basketVec[blueIndx[randBlueIndx]].setChangesFlag(1 << 6);
+            basketVec[blueIndx[randBlueIndx]].setChangesFlag(MesgOneBlueRemoved);
+            indxForDo.second = blueIndx[randBlueIndx];
         }
     }
     else if( blueIndx.size() != 0 && blueRedIndx.size() == 0)
     {
+        setChangesFlag(MesgTwoMixedRemoved);
         randBlueIndx = QRandomGenerator::global()->bounded(blueIndx.size());
         basketVec[blueIndx[randBlueIndx]].subBlueBall(1);
-        basketVec[blueIndx[randBlueIndx]].setChangesFlag(1 << 6);
+        basketVec[blueIndx[randBlueIndx]].setChangesFlag(MesgOneBlueRemoved);
+        indxForDo.first = blueIndx[randBlueIndx];
     }
     else if(blueIndx.size() == 0 && blueRedIndx.size() != 0)
     {
+        setChangesFlag(MesgTwoMixedRemoved);
         randBlueIndx = QRandomGenerator::global()->bounded(blueRedIndx.size());
         basketVec[blueRedIndx[randBlueIndx]].subBlueBall(1);
-        basketVec[blueRedIndx[randBlueIndx]].setChangesFlag(1 << 6);
+        basketVec[blueRedIndx[randBlueIndx]].setChangesFlag(MesgOneBlueRemoved);
+        indxForDo.first = blueRedIndx[randBlueIndx];
         blueRedIndx.removeAt(randBlueIndx);
     }
 
     if(redIndx.size() != 0 && blueRedIndx.size() != 0){
+
         randInt = QRandomGenerator::global()->bounded(2);
         if(randInt == 0)
         {
+            setChangesFlag(MesgTwoMixedRemoved);
             randRedIndx = QRandomGenerator::global()->bounded(blueRedIndx.size());
             basketVec[blueRedIndx[randRedIndx]].subRedBall(1);
-            basketVec[blueRedIndx[randRedIndx]].setChangesFlag(1 << 6);
+            basketVec[blueRedIndx[randRedIndx]].setChangesFlag(MesgOneRedRemoved);
+            indxForDo.second = blueRedIndx[randRedIndx];
         }
         else
         {
+            setChangesFlag(MesgTwoMixedRemoved);
             randRedIndx = QRandomGenerator::global()->bounded(redIndx.size());
             basketVec[redIndx[randRedIndx]].subRedBall(1);
-            basketVec[redIndx[randRedIndx]].setChangesFlag(1 << 6);
+            basketVec[redIndx[randRedIndx]].setChangesFlag(MesgOneRedRemoved);
+            indxForDo.second = redIndx[randRedIndx];
         }
     }
     else if( redIndx.size() != 0 && blueRedIndx.size() == 0)
     {
+        setChangesFlag(MesgTwoMixedRemoved);
         randRedIndx = QRandomGenerator::global()->bounded(redIndx.size());
         basketVec[redIndx[randRedIndx]].subRedBall(1);
-        basketVec[redIndx[randRedIndx]].setChangesFlag(1 << 6);
+        basketVec[redIndx[randRedIndx]].setChangesFlag(MesgOneRedRemoved);
+        indxForDo.second = redIndx[randRedIndx];
     }
     else if(redIndx.size() == 0 && blueRedIndx.size() != 0)
     {
+        setChangesFlag(MesgTwoMixedRemoved);
         randRedIndx = QRandomGenerator::global()->bounded(blueRedIndx.size());
         basketVec[blueRedIndx[randRedIndx]].subRedBall(1);
-        basketVec[blueRedIndx[randRedIndx]].setChangesFlag(1 << 6);
+        basketVec[blueRedIndx[randRedIndx]].setChangesFlag(MesgOneRedRemoved);
+        indxForDo.second = blueRedIndx[randRedIndx];
     }
 }
 
 
 const char *Baskets::getLustChanges() const
-{
-    if (changesFlag & 1 << 0)
+{   
+    if (changesFlag & MoveBlue)
     {
         return "Последнее действие: извлекли синий шар";
     }
-    else if (changesFlag & 1 << 1)
+    else if (changesFlag & MoveRed)
     {
         return "Последнее действие: извлекли красный шар";
     }
-    else if (changesFlag & 1 << 5)
+    else if (changesFlag & MesgTwoBlueRemoved)
     {
         return "Последнее действие: извлекли 2 синих шара";
     }
-    else if (changesFlag & 1 << 6)
+    else if (changesFlag & MesgOneBlueRemoved)
     {
         return "Последнее действие: извлекли 1 синий шар";
     }
-    else if (changesFlag & 1 << 7)
+    else if (changesFlag & MesgTwoRedRemoved)
     {
         return "Последнее действие: извлекли 2 красных шара";
     }
-    else if (changesFlag & 1 << 8)
+    else if (changesFlag & MesgOneRedRemoved)
     {
         return "Последнее действие: извлекли 1 красный шар";
     }
-    else if (changesFlag & 1 << 9)
+    else if (changesFlag & MesgMixedRemoved)
     {
         return "Последнее действие: извлекли 1 синий и 1 красный шар";
     }
-    else if(changesFlag & 1 << 10)
+    else if(changesFlag & MesgBlueAdded)
     {
         return "Последнее действие: добавили синий шар";
     }
-    else if(changesFlag & 1 << 11)
+    else if(changesFlag & MesgRedAdded)
     {
         return "Последнее действие: добавили красный шар";
     }
@@ -583,46 +618,139 @@ const char *Baskets::getLustChanges() const
     return "";
 }
 
+//Логи
 
-void Baskets::replaceBall(QVector<Baskets> & basketVec, int indx)
-{
-    int randInt = 0;
-    int insertIndx = getRandomSelectBasketExcept(basketVec, indx);
-    if (basketVec[indx].getCountBlueBalls() >= 1 || basketVec[indx].getCountRedBalls() >= 1)
+void Baskets::setLogOneBall(logCreater & logLustTime, logCreater & logAllTime){
+    if(indxForDo.first >= 0 && indxForDo.second >= 0)
     {
-        randInt = QRandomGenerator::global()->bounded(1, 101);
-        if (randInt <= basketVec[indx].getProcentGetBlueBall())
+        if(changesFlag == MoveBlue)
         {
-            basketVec[indx].subBlueBall(1);
-            basketVec[insertIndx].addBlueBall(1);
-            basketVec[indx].setChangesFlag( 1 << 0);
-            basketVec[insertIndx].setChangesFlag(1 << 10);
+            changesFlag = changesFlag ^ (MoveBlue);
+            logLustTime.message(QString("Был перетащен синий шар из %1 корзины во %2 корзину").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+            logAllTime.message(QString("Был перетащен синий шар из %1 корзины во %2 корзину").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+
+            indxForDo.first = -1; indxForDo.second = -1;
         }
-        else if(randInt > basketVec[indx].getProcentGetBlueBall())
+        else if(changesFlag == MoveRed)
         {
-            basketVec[indx].subRedBall(1);
-            basketVec[insertIndx].addRedBall(1);
-            basketVec[indx].setChangesFlag(1 << 1);
-            basketVec[insertIndx].setChangesFlag(1 << 11);
+            changesFlag = changesFlag ^ (MoveRed);
+            logLustTime.message(QString("Был перетащен крансый шар из %1 корзины во %2 корзину").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+            logAllTime.message(QString("Был перетащен крансый шар из %1 корзины во %2 корзину").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+
+            indxForDo.first = -1; indxForDo.second = -1;
         }
     }
 }
 
+void Baskets::setLogTwoBall(logCreater & logLustTime, logCreater & logAllTime){
+    if(indxForDo.first >= 0 || indxForDo.second >= 0)
+    {
+        if(changesFlag == MesgTwoBlueRemoved){
+            changesFlag = changesFlag ^ (MesgTwoBlueRemoved);
+            logLustTime.message(QString("Было удалено 2 синих шара из %1 корзины.").arg(indxForDo.first + 1));
+            logAllTime.message(QString("Было удалено 2 синих шара из %1 корзины.").arg(indxForDo.first + 1));
+
+            indxForDo.first = -1; indxForDo.second = -1;
+        }
+        else if(changesFlag == MesgOneBlueRemoved)
+        {
+            changesFlag = changesFlag ^ (MesgOneBlueRemoved);
+            logLustTime.message(QString("Было удалено по 1-ному синему шару из коризины %1 и из корзины %2.").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+            logAllTime.message(QString("Было удалено по 1-ному синему шару из коризины %1 и из корзины %2.").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+
+            indxForDo.first = -1; indxForDo.second = -1;
+        }
+        else if(changesFlag == MesgTwoRedRemoved){
+            changesFlag = changesFlag ^ (MesgTwoRedRemoved);
+            logLustTime.message(QString("Было удалено 2 красных шара из %1 корзины.").arg(indxForDo.first + 1));
+            logAllTime.message(QString("Было удалено 2 красных шара из %1 корзины.").arg(indxForDo.first + 1));
+
+            indxForDo.first = -1; indxForDo.second = -1;
+        }
+        else if(changesFlag == MesgOneRedRemoved){
+            changesFlag = changesFlag ^ (MesgOneRedRemoved);
+            logLustTime.message(QString("Было удалено по 1-ному красному шару из коризины %1 и из корзины %2.").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+            logAllTime.message(QString("Было удалено по 1-ному красному шару из коризины %1 и из корзины %2.").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+
+            indxForDo.first = -1; indxForDo.second = -1;
+        }
+        else if(changesFlag == MesgMixedRemoved){
+            changesFlag = changesFlag ^ (MesgMixedRemoved);
+            logLustTime.message(QString("Были удалены 1 синий 1 красный шар из %1 корзины.").arg(indxForDo.first + 1));
+            logAllTime.message(QString("Были удалены 1 синий 1 красный шар из %1 корзины.").arg(indxForDo.first + 1));
+
+            indxForDo.first = -1; indxForDo.second = -1;
+        }
+        else if(changesFlag == MesgTwoMixedRemoved){
+            changesFlag = changesFlag ^ (MesgTwoMixedRemoved);
+            logLustTime.message(QString("Был удалён синий шар из корзины %1 и красный шар из корзины %2.").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+            logAllTime.message(QString("Был удалён синий шар из корзины %1 и красный шар из корзины %2.").arg(indxForDo.first + 1).arg(indxForDo.second + 1));
+
+            indxForDo.first = -1; indxForDo.second = -1;
+        }
+    }
+}
+
+void Baskets::startSettingsLog(QVector<Baskets> & basketVec, logCreater & logLustTime, logCreater & logAllTime){
+    QString str = "";
+
+    for(int i = 0; i < basketVec.size(); ++i){
+        str = str + QString(" { b:%1, r:%2 } ").arg(basketVec[i].getCountBlueBalls()).arg(basketVec[i].getCountRedBalls());
+    }
+    logLustTime.message(str);
+    logAllTime.message(str);
+}
+
+void Baskets::replaceBall(QVector<Baskets> & basketVec, int indx)
+{
+    if(basketVec[indx].getAllCount() >= 1)
+    {
+        int randInt = 0;
+        int insertIndx = getRandomSelectBasketExcept(basketVec, indx);
+        if (basketVec[indx].getCountBlueBalls() >= 1 || basketVec[indx].getCountRedBalls() >= 1)
+        {
+            randInt = QRandomGenerator::global()->bounded(1, 101);
+            if (randInt <= basketVec[indx].getProcentGetBlueBall())
+            {
+                basketVec[indx].subBlueBall(1);
+                basketVec[insertIndx].addBlueBall(1);
+                basketVec[indx].setChangesFlag( MoveBlue);
+                setChangesFlag(MoveBlue);
+                basketVec[insertIndx].setChangesFlag(MesgBlueAdded);
+                indxForDo.first = indx;
+                indxForDo.second = insertIndx;
+            }
+            else if(randInt > basketVec[indx].getProcentGetBlueBall())
+            {
+                basketVec[indx].subRedBall(1);
+                basketVec[insertIndx].addRedBall(1);
+                basketVec[indx].setChangesFlag(MoveRed);
+                setChangesFlag(MoveRed);
+                basketVec[insertIndx].setChangesFlag(MesgRedAdded);
+                indxForDo.first = indx;
+                indxForDo.second = insertIndx;
+            }
+        }
+    }else{
+        indxForDo.first = -1;
+        indxForDo.second = -1;
+    }
+}
+
 void Baskets::processTwoBlue(QVector<Baskets> & basketVec, int randInt){
-    changesFlag = changesFlag ^ (1 << 2);
+    changesFlag = changesFlag ^ (RemoveTwoBlueMode);
 
     subTwoBlueBalls(basketVec, randInt);
 }
 
 void Baskets::processTwoRed(QVector<Baskets> & basketVec, int randInt){
-    changesFlag = changesFlag ^ (1 << 3);
+    changesFlag = changesFlag ^ (RemoveTwoRedMode);
 
     subTwoRedBalls(basketVec, randInt);
 }
 
 void Baskets::processMixed(QVector<Baskets> & basketVec, int randInt){
-    changesFlag = changesFlag ^ (1 << 4);
-
+    changesFlag = changesFlag ^ (RemoveMixedMode);
     if(randInt >= 0 && randInt < basketVec.size())
     {
         subMixedBallsOneBasket(basketVec, randInt);
@@ -640,19 +768,16 @@ void Baskets::replaceTwoBalls(QVector<Baskets> & basketVec)
         setRandomChangesFlag(basketVec);
 
         unsigned int randInt = getCorrectRandInt(basketVec);
-        //0 = вычетает 2 шара из первой корзины
-        //1 = вычетает 2 шара из второй корзины
-        //2 = вычетает 1 шар из первой корзины и 1 шар из второй
 
-        if (changesFlag & 1 << 2)
+        if (changesFlag & RemoveTwoBlueMode)
         {
             processTwoBlue(basketVec, randInt);                   //вычетает 2 синих шара
         }
-        else if (changesFlag & 1 << 3)
+        else if (changesFlag & RemoveTwoRedMode)
         {
             processTwoRed(basketVec, randInt);                    //вычетает 2 красных шара
         }
-        else if (changesFlag & 1 << 4)
+        else if (changesFlag & RemoveMixedMode)
         {
             processMixed(basketVec, randInt);                     //вычетает 2 смешанных шара
         }
@@ -660,15 +785,15 @@ void Baskets::replaceTwoBalls(QVector<Baskets> & basketVec)
 }
 
 void Baskets::determintaeReplaceTwoBalls(QVector<Baskets>& basketVec, short dChangesFlag, int dRandInt){
-    if (dChangesFlag & 1 << 2)
+    if (dChangesFlag & RemoveTwoBlueMode)
     {
         processTwoBlue(basketVec, dRandInt);                   //вычетает 2 синих шара
     }
-    else if (dChangesFlag & 1 << 3)
+    else if (dChangesFlag & RemoveTwoRedMode)
     {
         processTwoRed(basketVec, dRandInt);                    //вычетает 2 красных шара
     }
-    else if (dChangesFlag & 1 << 4)
+    else if (dChangesFlag & RemoveMixedMode)
     {
         processMixed(basketVec, dRandInt);                     //вычетает 2 смешанных шара
     }

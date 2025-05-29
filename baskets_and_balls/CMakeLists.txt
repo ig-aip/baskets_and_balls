@@ -13,6 +13,12 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Test)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Test)
 
 
+add_library(logcreater STATIC
+    logcreater.cpp
+    logcreater.h
+)
+target_link_libraries(logcreater PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
 add_library(baskets_lib STATIC
     baskets.cpp
     baskets.h
@@ -43,8 +49,6 @@ else()
     else()
         add_executable(baskets_and_balls
             ${PROJECT_SOURCES}
-
-
         )
     endif()
 endif()
@@ -59,6 +63,9 @@ target_link_libraries(baskets_and_balls PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     baskets_lib
 )
+
+target_link_libraries(baskets_lib PRIVATE logcreater)
+target_link_libraries(baskets_and_balls PRIVATE logcreater)
 
 add_executable(test_baskets test_baskets.cpp)
 target_link_libraries(test_baskets PRIVATE

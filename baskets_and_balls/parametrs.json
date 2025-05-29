@@ -1,20 +1,20 @@
 {
 	"baskets": [
 		{
-			"blue": 2,
-			"red": 0
+			"blue": 20,
+			"red": 20
 		},
 		{
-			"blue": 0,
-			"red": 0
+			"blue": 200,
+			"red": 20
 		},
 		{
-			"blue": 0,
-			"red": 0
+			"blue": 20,
+			"red": 200
 		},
 		{
-			"blue": 0,
-			"red": 0
+			"blue": 20,
+			"red": 20
 		}
 	]
 }

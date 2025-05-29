@@ -1,7 +1,33 @@
-    #ifndef BASKETS_H
+#ifndef BASKETS_H
 #define BASKETS_H
 #include "QRandomGenerator"
 #include "QVector"
+#include "logcreater.h"
+
+
+enum changesFlagsNames : short{
+    None                  = 0,        // ничего
+    MoveBlue              = 1 << 0,   // перемещение синего шара
+    MoveRed               = 1 << 1,   // перемещение красного шара
+    RemoveTwoBlueMode     = 1 << 2,   // режим удаления 2 синих шаров
+    RemoveTwoRedMode      = 1 << 3,   // режим удаления 2 красных шаров
+    RemoveMixedMode       = 1 << 4,   // режим удаления 1 синего + 1 красного шара
+
+    MesgTwoBlueRemoved    = 1 << 5,   // сообщение об удалении 2 синих
+    MesgOneBlueRemoved    = 1 << 6,   // сообщение об удалении 1 синего
+    MesgTwoRedRemoved     = 1 << 7,   // сообщение об удалении 2 красных
+    MesgOneRedRemoved     = 1 << 8,   // сообщение об удалении 1 красного
+    MesgMixedRemoved      = 1 << 9,   // сообщение об удалении 1 синего + 1 красного
+
+    MesgBlueAdded         = 1 << 10,  // сообщение об добавлении синего
+    MesgRedAdded          = 1 << 11,  // сообщение об добавлении красного
+    MesgTwoMixedRemoved   = 1 << 12,  // вычетание 2 смешанных шаров из разных корзин ( для логов )
+
+
+
+};
+
+static std::pair<int , int> indxForDo{-1 , -1};
 
 class Baskets
 {
@@ -23,6 +49,7 @@ private:
     //(1 << 9)  00000000 01000000 сооьщение об удалении 1 синего и 1 красного шара
     //(1 << 10) 00000000 00100000 сообщение об добавлении синего шара
     //(1 << 11) 00000000 00010000 сообщение об добавлении красного шара
+    //(1 << 12) 00000000 00001000 сообщение об удалении смешанных цветов из разнык корзин( для логов )
 
 public:
     Baskets();
@@ -100,6 +127,15 @@ public:
     const char *getLustChanges() const;
 
 
+    //Логи
+    void setLogOneBall(logCreater & logLustTime, logCreater & logAllTime);
+
+    void setLogTwoBall(logCreater & logLustTime, logCreater & logAllTime);
+
+    void startSettingsLog(QVector<Baskets> & basketVec, logCreater & logLustTime, logCreater & logAllTime);
+
+
+    //вспомогательные методы для удаления двух шаров
     void processTwoBlue(QVector<Baskets> & basketVec, int randInt);
 
     void processTwoRed(QVector<Baskets> & basketVec, int randInt);
@@ -111,6 +147,7 @@ public:
     void replaceBall(QVector<Baskets> &basketVec, int indx);
 
     void replaceTwoBalls(QVector<Baskets> &basketVec);
+
 
 
     //детерминированный вариант методов, для тестов

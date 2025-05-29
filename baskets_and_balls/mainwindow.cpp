@@ -5,7 +5,10 @@
 #include "QString"
 #include "QGridLayout"
 #include "jsonloader.h"
+#include "logcreater.h"
 
+logCreater logLustTime("logLustTime.log");
+logCreater logAllTime("logAllTime.log", 'a');
 
 JsonLoader loader;
 QVector<Baskets> basketVec = loader.loaderBasketes("parametrs.json");
@@ -19,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     if(basketVec.size() < 2 || basketVec.size() > 4){ qFatal("error count baskets");}
 
+    buffer.startSettingsLog(basketVec, logLustTime, logAllTime);
     createBasketsWidgets();
     updateUI();
 }
@@ -75,7 +79,7 @@ void MainWindow::createBasketsWidgets(){
     }
 }
 
-#if 1
+
 void MainWindow::updateUI() {
     for(int i = 0; i < basketLabels.size(); ++i){
         countAllLabels[i]->setText(QString("Шаров в корзине: %1").arg(basketVec[i].getAllCount()));
@@ -91,7 +95,7 @@ void MainWindow::updateUI() {
     ui->procentOneBlueOneRed->setText(QString("Вероятность взять 1 красный и 1 синий шар: %1%").arg(buffer.getProcentOneRedOneBlueBalls(basketVec)));
 
 }
-#endif
+
 
 MainWindow::~MainWindow()
 {
@@ -106,12 +110,14 @@ void MainWindow::on_replaceBall_clicked()
     int indx = replaceOneBallButtons.indexOf(senderBtn);
 
     buffer.replaceBall(basketVec, indx);
+    buffer.setLogOneBall(logLustTime, logAllTime);
     updateUI();
 }
 
 void MainWindow::on_subTwoButton_clicked()
 {
     buffer.replaceTwoBalls(basketVec);
+    buffer.setLogTwoBall(logLustTime, logAllTime);
     updateUI();
 }
 
