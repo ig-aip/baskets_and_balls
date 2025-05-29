@@ -49,6 +49,9 @@ void MainWindow::createBasketsWidgets(){
         QLabel* procentGetRedBalls = new QLabel(QString("Вероятность достать красный шар: "), groupBox);
         QLabel* lustChange = new QLabel(QString("Последнее изменение: "), groupBox);
         QPushButton* btn = new QPushButton(QString("Переложить в случайную коробку"), this);
+        GUIBasket* guiBasket = new GUIBasket(this);
+
+
         connect(btn, &QPushButton::clicked, this, &MainWindow::on_replaceBall_clicked);
 
         layout->addWidget(countBalls, 0 ,0);
@@ -66,10 +69,12 @@ void MainWindow::createBasketsWidgets(){
         procentRedLabels.push_back(procentGetRedBalls);
         lustChangesLabels.push_back(lustChange);
         replaceOneBallButtons.push_back(btn);
+        guiBaskets.push_back(guiBasket);
 
         QVBoxLayout* boxLayout = new QVBoxLayout();
         boxLayout->addWidget(groupBox);
         boxLayout->addWidget(btn);
+        boxLayout->addWidget(guiBasket);
 
         QWidget* wrapper = new QWidget();
         wrapper->setLayout(boxLayout);
@@ -87,6 +92,7 @@ void MainWindow::updateUI() {
         countRedLabels[i]->setText(QString("Красных шаров в корзине: %1").arg(basketVec[i].getCountRedBalls()));
         procentBlueLabels[i]->setText(QString("Вероятность достать синий шар: %1%").arg(basketVec[i].getProcentGetBlueBall()));
         procentRedLabels[i]->setText(QString("Вероятность достать красный шар: %1%").arg(basketVec[i].getProcentGetRedBall()));
+        guiBaskets[i]->setPercent(basketVec[i].getProcentGetBlueBall(), basketVec[i].getProcentGetRedBall());
         lustChangesLabels[i]->setText(basketVec[i].getLustChanges());
     }
 

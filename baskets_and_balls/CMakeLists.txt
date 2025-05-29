@@ -49,6 +49,7 @@ else()
     else()
         add_executable(baskets_and_balls
             ${PROJECT_SOURCES}
+            guibasket.h guibasket.cpp
         )
     endif()
 endif()

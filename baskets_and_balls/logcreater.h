@@ -14,9 +14,9 @@ private:
     char mod;
 public:
 
-    logCreater(const QString &fileName);
+    explicit logCreater(const QString &fileName);
 
-    logCreater(const QString &fileName, char mod);
+    explicit logCreater(const QString &fileName, char mod);
 
     ~logCreater();
 

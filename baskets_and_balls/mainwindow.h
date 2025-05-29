@@ -6,6 +6,8 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
+#include "guibasket.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -39,6 +41,7 @@ private:
     QVector<QLabel*> procentRedLabels;
     QVector<QLabel*> lustChangesLabels;
     QVector<QPushButton*> replaceOneBallButtons;
+    QVector<GUIBasket*> guiBaskets;
 
     QLayout* basketsLayOut = nullptr;
 };
