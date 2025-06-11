@@ -28,6 +28,8 @@ private slots:
 
     void on_subTwoButton_clicked();
 
+    void on_sortLogButton_clicked();
+
 private:
     void createBasketsWidgets();
     void updateUI();

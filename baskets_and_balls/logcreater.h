@@ -14,11 +14,11 @@ private:
     char mod;
 public:
 
-    explicit logCreater(const QString &fileName);
-
     explicit logCreater(const QString &fileName, char mod);
 
     ~logCreater();
+
+    QStringList dateTimeSort(QDateTime& from, QDateTime& to, const QString& fileName);
 
     void message(QString str);
 };

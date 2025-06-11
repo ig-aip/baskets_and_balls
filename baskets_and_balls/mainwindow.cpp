@@ -7,7 +7,7 @@
 #include "jsonloader.h"
 #include "logcreater.h"
 
-logCreater logLustTime("logLustTime.log");
+logCreater logLustTime("logLustTime.log", 't');
 logCreater logAllTime("logAllTime.log", 'a');
 
 JsonLoader loader;
@@ -128,4 +128,18 @@ void MainWindow::on_subTwoButton_clicked()
 }
 
 
+
+
+void MainWindow::on_sortLogButton_clicked()
+{
+    ui->logView->clear();
+    QDateTime from = ui->dateFrom->dateTime();
+    QDateTime to = ui->dateTo->dateTime();
+
+    QStringList list = logAllTime.dateTimeSort(from, to, "logAllTime.log");
+
+    for(QString line : list){
+        ui->logView->appendPlainText(line);
+    }
+}
 
